@@ -1,0 +1,89 @@
+#!/bin/bash
+set -euo pipefail
+
+readonly GTASK_PROXY_URL='http://127.0.0.1:2333/tasks'
+readonly RESULT_FILE='/tmp/tasks.output'
+
+usage() {
+  echo 'TODO'
+}
+
+normalize__space() {
+  local string="${1}"
+
+  echo "${string}" | sed -e 's; ;%20;g'
+}
+
+
+call_gtasksks_proxy() {
+  local path=${1}
+  local method=${2:-'GET'}
+
+  status=$(expr 0 + $(curl -s -w "%{http_code}\n" -X "${method}" "${GTASK_PROXY_URL}/${1}" -o "${RESULT_FILE}"))
+  if [[ ${status} =~ ^2[0-9][0-9]$ ]] ; then
+    cat "${RESULT_FILE}"
+    exit 0
+  else
+    echo "Request failed with status:${status}."
+    exit "${status}"
+  fi
+}
+
+task_to_perform='none'
+while getopts hlrtda:i:n:ip:b OPT; do
+  case "$OPT" in
+    l)
+        call_gtasksks_proxy 'list/today'
+        ;;
+    t)
+        call_gtasksks_proxy 'list/tomorrow'
+		      ;;
+    r)
+        call_gtasksks_proxy 'refresh' 'POST'
+        ;;
+    i)
+        TASK_ID="${OPTARG}"
+        ;;
+    d)
+        task_to_perform='delete'
+        ;;
+    a)
+        task_to_perform='add-task'
+        readonly TASK_TITLE="${OPTARG}"
+        ;;
+    n)
+        readonly NOTES="${OPTARG}"
+        ;;
+    p)
+        POSTPONE_TO="${OPTARG}"
+        ;;
+    b)
+        task_to_perform='bump'
+        ;;
+    h)
+        usage
+        exit 0
+        ;;
+  esac
+done
+
+if [ "${task_to_perform}" = 'add-task' ]; then
+    call_gtasksks_proxy $(normalize__space "${TASK_TITLE}/${NOTES}") 'PUT'
+fi
+
+# the next tasks requires to have a task id set
+readonly TASK_ID=${TASK_ID:-""}
+if [ -z "${TASK_ID}" ] ; then
+  echo "This action requires to give a task Id."
+  exit 1
+fi
+
+readonly POSTPONE_TO="${POSTPONE_TO:-1}"
+
+if [ "${task_to_perform}" = 'bump' ]; then
+  call_gtasksks_proxy "bump/to/${TASK_ID}/${POSTPONE_TO}" 'POST'
+fi
+
+if [ "${task_to_perform}" = 'delete' ]; then
+  call_gtasksks_proxy "delete/${TASK_ID}" 'DELETE'
+fi
