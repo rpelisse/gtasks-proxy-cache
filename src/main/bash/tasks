@@ -52,7 +52,7 @@ while getopts hlrtda:i:n:ip:b OPT; do
         readonly TASK_TITLE="${OPTARG}"
         ;;
     n)
-        readonly NOTES="${OPTARG}"
+        NOTES="${OPTARG}"
         ;;
     p)
         POSTPONE_TO="${OPTARG}"
@@ -67,6 +67,7 @@ while getopts hlrtda:i:n:ip:b OPT; do
   esac
 done
 
+readonly NOTES=${NOTES:-""}
 if [ "${task_to_perform}" = 'add-task' ]; then
     call_gtasksks_proxy $(normalize__space "${TASK_TITLE}/${NOTES}") 'PUT'
 fi
