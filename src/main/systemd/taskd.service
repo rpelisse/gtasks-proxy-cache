@@ -1,0 +1,11 @@
+[Unit]
+Description=Taskd daemon service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+EnvironmentFile=/etc/taskd.conf
+PIDFile=/var/run/taskd.pid
+ExecStart=/opt/quarkus-gtasks-proxy/taskd
+
+[Install]
