@@ -1,0 +1,12 @@
+#!/bin/bash
+
+readonly TASKS_HOME=${TASKS_HOME:-$(pwd)}
+readonly TASKS_LOGFILE=${TASKS_LOGFILE:-"$(pwd)/tasks.log"}
+readonly TASKS_PIDFILE=${TASKS_PIDFILE:-'/var/run/taskd.pid'}
+set -euo pipefail
+IFS=$'\n\t'
+
+which tee 2>&1 > /dev/null
+
+export TASKS_CLIENT_SECRET=${TASKS_CLIENT_SECRET:-"${TASKS_HOME}/client_secret.json"}
+java -jar ${TASKS_HOME}/quarkus-gtasks-proxy-*-runner.jar | tee "${TASKS_LOGFILE}"
