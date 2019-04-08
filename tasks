@@ -1,8 +1,0 @@
-#!/bin/bash
-
-readonly TASKS_HOME=${TASKS_HOME:-$(pwd)}
-set -euo pipefail
-IFS=$'\n\t'
-
-export TASKS_CLIENT_SECRET="${TASKS_HOME}/client_secret.json"
-java -jar "${TASKS_HOME}/target/quarkus-gtasks-proxy-1.0-SNAPSHOT-runner.jar"
