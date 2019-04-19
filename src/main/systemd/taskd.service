@@ -9,3 +9,4 @@ PIDFile=/var/run/taskd.pid
 ExecStart=/opt/quarkus-gtasks-proxy/taskd
 
 [Install]
+WantedBy=multi-user.target
