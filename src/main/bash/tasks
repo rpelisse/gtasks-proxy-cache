@@ -30,14 +30,17 @@ call_gtasksks_proxy() {
 }
 
 task_to_perform='none'
-while getopts hlrtda:i:n:ip:b OPT; do
+while getopts hlrtda:i:n:ip:bo OPT; do
   case "$OPT" in
     l)
         call_gtasksks_proxy 'list/today'
         ;;
     t)
         call_gtasksks_proxy 'list/tomorrow'
-		      ;;
+		;;
+    o)
+        call_gtasksks_proxy 'list/overdue'
+        ;;
     r)
         call_gtasksks_proxy 'refresh' 'POST'
         ;;

@@ -8,14 +8,19 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.DELETE;
@@ -40,7 +45,6 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.tasks.Tasks;
 import com.google.api.services.tasks.TasksScopes;
 import com.google.api.services.tasks.model.Task;
-
 
 @Path("/tasks")
 public class TasksService {
@@ -155,14 +159,18 @@ public class TasksService {
     }
 
     private void bump(String id, int nbDays) throws IOException {
-        long NB_SECONDS_BY_DAY = 86400L * 1000;
         Tasks taskService = getService();
         Task task = taskService.tasks().get("@default", id).execute();
         if ( task != null ) {
-            task.setDue(new DateTime(task.getDue().getValue() + (nbDays * NB_SECONDS_BY_DAY)));
-            taskService.tasks().update("@default", task.getId(), task).execute();
+            taskService.tasks().update("@default", task.getId(), pushDueDateTo(task, nbDays)).execute();
             asyncRefresh();
          }
+    }
+
+    private Task pushDueDateTo(Task task, int nbDays ) {
+        long NB_SECONDS_BY_DAY = 86400L * 1000;
+        task.setDue(new DateTime(task.getDue().getValue() + (nbDays * NB_SECONDS_BY_DAY)));
+        return task;
     }
 
     @PUT
@@ -191,8 +199,26 @@ public class TasksService {
     @Path("/list/today")
     @Produces(MediaType.TEXT_PLAIN)
     public String todayList() throws IOException, GeneralSecurityException {
-        return formatTaskList(today());
+    	final DateTime today = today();
+        return formatTaskList((t -> { return isSameDay(today, t.getDue()); }), today);
     }
+
+
+    @GET
+    @Path("/list/overdue")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String overdueList() throws IOException, GeneralSecurityException {
+    	return formatOverdueTaskList((t -> { return isDueDateBefore(today(), t.getDue()); }));
+    }
+
+    @GET
+    @Path("/list/tomorrow")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String List() throws IOException, GeneralSecurityException {
+    	final DateTime tomorrow = tomorrow();
+    	return formatTaskList((t -> { return isSameDay(tomorrow, t.getDue()); }), tomorrow);
+    }
+
 
     @DELETE
     @Path("/delete/{id}")
@@ -218,13 +244,6 @@ public class TasksService {
     }
 
     @GET
-    @Path("/list/tomorrow")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String tomorrowList() throws IOException, GeneralSecurityException {
-        return formatTaskList(tomorrow());
-    }
-
-    @GET
     @Path("/pid")
     @Produces(MediaType.TEXT_PLAIN)
     public String pid() {
@@ -232,16 +251,52 @@ public class TasksService {
     }
 
     private static boolean isSameDay(DateTime day, DateTime otherDay) {
+    	if ( areDatesNull(day, otherDay) ) {
+    		return false;
+    	}
         return day.toStringRfc3339().substring(0,10).equals(otherDay.toStringRfc3339().substring(0,10));
     }
 
-    private static String formatTaskList(DateTime dueDate) {
-        String output = "Tasks due on " + dueDate + ":\n\n";
-        int taskId = 0;
-        for ( Task t : tasks.values() ) {
-            if ( isSameDay(dueDate,t.getDue()) )
-                output += taskId++ + ") [" + t.getId() + "] " + t.getTitle() + "\n";
-        }
-        return output;
+    private static boolean areDatesNull(DateTime day, DateTime otherDay) {
+    	return (day == null || otherDay == null );
+    }
+
+    private static SimpleDateFormat SIMPLE_DATE_FORMATTER = new SimpleDateFormat("yyyyMMdd");
+    private static int compareDateTo(Date date1, Date date2) {
+    	return SIMPLE_DATE_FORMATTER.format(date1).compareTo(SIMPLE_DATE_FORMATTER.format(date2));
+    }
+
+    private static int compareDateTo(DateTime date1, DateTime date2) {
+    	return compareDateTo(new Date(date1.getValue()), new Date(date2.getValue()));
+    }
+
+    private static boolean isDueDateBefore(DateTime dueDate, DateTime date) {
+    	return areDatesNull(dueDate, date) ? false : (compareDateTo(dueDate, date) > 0);
+    }
+
+    private static String formatTask(AtomicInteger counter, Task t) {
+    	return counter.getAndIncrement() + ") [" + t.getId() + "] " + t.getTitle();
+    }
+
+    private static  String selectTasksToDisplay(Predicate<Task> predicate, AtomicInteger counter) {
+    	return tasks.values().stream()
+			.filter(t -> predicate.test(t)).map( t -> formatTask(counter, t))
+			.collect(Collectors.joining("\n"));
+    }
+
+    private static String formatTaskList(Predicate<Task> predicate, DateTime date) {
+        return formatOverdueTaskList("Tasks due on " + date + ":\n\n", predicate);
+    }
+
+    private static String formatOverdueTaskList(Predicate<Task> predicate) {
+    	return formatOverdueTaskList("Tasks overdue:\n\n", predicate);
+    }
+
+    private static String formatOverdueTaskList(String header, Predicate<Task> predicate) {
+        return formatOverdueTaskList(header,  predicate,  "\n\n");
+    }
+
+    private static String formatOverdueTaskList(String header, Predicate<Task> predicate, String footer) {
+        return header + selectTasksToDisplay(predicate, new AtomicInteger(1)) + footer;
     }
 }
