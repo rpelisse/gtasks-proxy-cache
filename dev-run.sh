@@ -1,5 +1,5 @@
 #!/bin/bash
-export JAVA_HOME=/usr/lib/jvm/java-9-openjdk/
+export JAVA_HOME=${JAVA_HOME:-'/usr/lib/jvm/java-11'}
 export PATH=${JAVA_HOME}/bin:${PATH}
 
 
