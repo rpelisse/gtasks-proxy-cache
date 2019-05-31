@@ -8,10 +8,10 @@ usage() {
   echo 'TODO'
 }
 
-normalize__space() {
+encode_chars_for_url() {
   local string="${1}"
 
-  echo "${string}" | sed -e 's; ;%20;g'
+  echo "${string}" | sed -e 's; ;%20;g' -e 's;/;%2F;g'
 }
 
 
@@ -72,7 +72,7 @@ done
 
 readonly NOTES=${NOTES:-""}
 if [ "${task_to_perform}" = 'add-task' ]; then
-    call_gtasksks_proxy $(normalize__space "${TASK_TITLE}/${NOTES}") 'PUT'
+    call_gtasksks_proxy $(encode_chars_for_url "${TASK_TITLE}")/$(encode_chars_for_url "${NOTES}") 'PUT'
 fi
 
 # the next tasks requires to have a task id set
