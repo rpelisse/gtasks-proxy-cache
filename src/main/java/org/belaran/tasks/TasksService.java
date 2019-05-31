@@ -49,271 +49,302 @@ import com.google.api.services.tasks.model.Task;
 @Path("/tasks")
 public class TasksService {
 
-    private final static Logger LOGGER = Logger.getLogger(TasksService.class.getName());
+	private final static Logger LOGGER = Logger.getLogger(TasksService.class.getName());
 
-    private static final String APPLICATION_NAME = "Google Tasks API Java Quickstart";
-    private static final String TASK_CLIENT_SECRET_FILE_ENV_VAR_NAME = "TASKS_CLIENT_SECRET";
-    private static final String TASK_PID_FILE_ENV_VAR_NAME = "TASKS_PIDFILE";
-    //
+	private static final String APPLICATION_NAME = "Google Tasks API Java Quickstart";
+	private static final String TASK_CLIENT_SECRET_FILE_ENV_VAR_NAME = "TASKS_CLIENT_SECRET";
+	private static final String TASK_PID_FILE_ENV_VAR_NAME = "TASKS_PIDFILE";
+	//
 
-    private final File DATA_STORE_DIR = new File(System.getProperty("user.home"), ".credentials/tasks-java-quickstart");
-    private final static String CLIENT_SECRET_FILENAME = System.getenv(TASK_CLIENT_SECRET_FILE_ENV_VAR_NAME);
-    private final static String PID_FILE_NAME = System.getenv(TASK_PID_FILE_ENV_VAR_NAME);
-    private final static JacksonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-    private final static List<String> SCOPES = Arrays.asList(TasksScopes.TASKS);
-    private static final long ONE_DAY__IN_MILLIS = 86400000;
+	private final File DATA_STORE_DIR = new File(System.getProperty("user.home"), ".credentials/tasks-java-quickstart");
+	private final static String CLIENT_SECRET_FILENAME = System.getenv(TASK_CLIENT_SECRET_FILE_ENV_VAR_NAME);
+	private final static String PID_FILE_NAME = System.getenv(TASK_PID_FILE_ENV_VAR_NAME);
+	private final static JacksonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+	private final static List<String> SCOPES = Arrays.asList(TasksScopes.TASKS);
+	private static final long ONE_DAY__IN_MILLIS = 86400000;
 
-    private static final ExecutorService executor = Executors.newSingleThreadExecutor();
+	private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    private static final Map<String, Task> tasks = new ConcurrentHashMap<String, Task>();
+	private static final Map<String, Task> tasks = new ConcurrentHashMap<String, Task>();
 
-    private FileDataStoreFactory dataStoreFactory;
-    private  NetHttpTransport httpTransport;
+	private FileDataStoreFactory dataStoreFactory;
+	private NetHttpTransport httpTransport;
 
-    private static DateTime today() {
-        return new DateTime(System.currentTimeMillis());
-    }
+	private static DateTime today() {
+		return new DateTime(System.currentTimeMillis());
+	}
 
-    private static DateTime tomorrow() {
-        return new DateTime(System.currentTimeMillis() + ONE_DAY__IN_MILLIS);
-    }
+	private static DateTime tomorrow() {
+		return new DateTime(System.currentTimeMillis() + ONE_DAY__IN_MILLIS);
+	}
 
-    public TasksService() throws IOException {
-        LOGGER.info("PID Filename:" + PID_FILE_NAME);
-        Files.write(Paths.get(PID_FILE_NAME), String.valueOf(ProcessHandle.current().pid()).getBytes());
-        LOGGER.info("PID has been stored into "  + PID_FILE_NAME);
-    }
+	public TasksService() throws IOException {
+		LOGGER.info("PID Filename:" + PID_FILE_NAME);
+		Files.write(Paths.get(PID_FILE_NAME), String.valueOf(ProcessHandle.current().pid()).getBytes());
+		LOGGER.info("PID has been stored into " + PID_FILE_NAME);
+	}
 
-    private void checkClientSecretFilename() {
-        if ( ! "".equals(CLIENT_SECRET_FILENAME) )
-            LOGGER.info("Client Secret stored in " + CLIENT_SECRET_FILENAME);
-        else
-            throw new IllegalStateException("Path to certificate file not provided.");
+	private void checkClientSecretFilename() {
+		if (!"".equals(CLIENT_SECRET_FILENAME))
+			LOGGER.info("Client Secret stored in " + CLIENT_SECRET_FILENAME);
+		else
+			throw new IllegalStateException("Path to certificate file not provided.");
 
-        if ( ! new java.io.File(CLIENT_SECRET_FILENAME).exists() )
-            throw new IllegalStateException("Certificate file does not exists: " + CLIENT_SECRET_FILENAME);
-    }
+		if (!new java.io.File(CLIENT_SECRET_FILENAME).exists())
+			throw new IllegalStateException("Certificate file does not exists: " + CLIENT_SECRET_FILENAME);
+	}
 
-    private GoogleClientSecrets openGoogleClientSecrets() throws IOException {
-        try {
-            return GoogleClientSecrets.load(JSON_FACTORY,
-                    new InputStreamReader(new FileInputStream( CLIENT_SECRET_FILENAME )));
+	private GoogleClientSecrets openGoogleClientSecrets() throws IOException {
+		try {
+			return GoogleClientSecrets.load(JSON_FACTORY,
+					new InputStreamReader(new FileInputStream(CLIENT_SECRET_FILENAME)));
 
-        } catch ( FileNotFoundException fileNotFoundException ) {
-            throw new IllegalStateException(fileNotFoundException);
-        }
-    }
+		} catch (FileNotFoundException fileNotFoundException) {
+			throw new IllegalStateException(fileNotFoundException);
+		}
+	}
 
-    @PostConstruct
-    void serviceInit() throws IOException, GeneralSecurityException {
-        checkClientSecretFilename();
+	@PostConstruct
+	void serviceInit() throws IOException, GeneralSecurityException {
+		checkClientSecretFilename();
 
-        dataStoreFactory = new FileDataStoreFactory(DATA_STORE_DIR);
-        httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+		dataStoreFactory = new FileDataStoreFactory(DATA_STORE_DIR);
+		httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 
-        this.refresh();
-    }
+		this.refresh();
+	}
 
-    private boolean refresh() throws IOException {
-        tasks.clear();
-        LOGGER.info("Local cache for tasks is being refreshed.");
-        fetchAllItemsOfDefaultList(getService());
-        return true;
-    }
+	private boolean refresh() throws IOException {
+		tasks.clear();
+		LOGGER.info("Local cache for tasks is being refreshed.");
+		fetchAllItemsOfDefaultList(getService());
+		return true;
+	}
 
-    private void fetchAllItemsOfDefaultList(Tasks service) throws IOException {
-        com.google.api.services.tasks.model.Tasks gtasks = null;
-        String token = null;
-        int nbItems = 0;
-        do {
-            gtasks = service.tasks().list("@default").setMaxResults(100l).setPageToken(token).execute();
-            if ( gtasks != null && gtasks.getItems() != null ) {
-	            for (Task t : gtasks.getItems()  ) {
-	            	LOGGER.fine("Adding to local cache:" + t.getTitle());
-	                tasks.put(t.getId(),t);
-	            }
-                nbItems += gtasks.getItems().size();
-                token = gtasks.getNextPageToken();
-            } else
-            	LOGGER.warning("Failed to retrieve any tasks!");
-        } while (token != null);
-        LOGGER.info("Cache refreshed with " + nbItems + " items fetched. (in cache: " + tasks.size() + " )." );
-        LOGGER.info("Due Date:" + today().toStringRfc3339());
-    }
+	private void fetchAllItemsOfDefaultList(Tasks service) throws IOException {
+		com.google.api.services.tasks.model.Tasks gtasks = null;
+		String token = null;
+		int nbItems = 0;
+		do {
+			gtasks = service.tasks().list("@default").setMaxResults(100l).setPageToken(token).execute();
+			if (gtasks != null && gtasks.getItems() != null) {
+				for (Task t : gtasks.getItems()) {
+					LOGGER.fine("Adding to local cache:" + t.getTitle());
+					tasks.put(t.getId(), t);
+				}
+				nbItems += gtasks.getItems().size();
+				token = gtasks.getNextPageToken();
+			} else
+				LOGGER.warning("Failed to retrieve any tasks!");
+		} while (token != null);
+		LOGGER.info("Cache refreshed with " + nbItems + " items fetched. (in cache: " + tasks.size() + " ).");
+		LOGGER.info("Due Date:" + today().toStringRfc3339());
+	}
 
-    private boolean asyncRefresh() throws IOException {
-        executor.submit(new Callable<Boolean>() {
+	private boolean asyncRefresh() throws IOException {
+		executor.submit(new Callable<Boolean>() {
 
-            @Override
-            public Boolean call() throws Exception {
-                return refresh();
-            }
-        });
-        return true;
-    }
+			@Override
+			public Boolean call() throws Exception {
+				return refresh();
+			}
+		});
+		return true;
+	}
 
-    private static Task buildTask(String title, String description, DateTime dueDate) {
-         Task task = new com.google.api.services.tasks.model.Task();
-         task.setTitle(title);
-         task.setNotes(description);
-         task.setDue(dueDate);
-         return task;
-    }
+	private static Task buildTask(String title, String description, DateTime dueDate) {
+		Task task = new com.google.api.services.tasks.model.Task();
+		task.setTitle(title);
+		task.setNotes(description);
+		task.setDue(dueDate);
+		return task;
+	}
 
-    private String insertTask(Task task) throws IOException {
-        String id = getService().tasks().insert("@default",task).execute().getId();
-        asyncRefresh();
-        return id;
-    }
+	private String insertTask(Task task) throws IOException {
+		String id = getService().tasks().insert("@default", task).execute().getId();
+		asyncRefresh();
+		return id;
+	}
 
-    private Tasks getService() throws IOException {
-        GoogleClientSecrets clientSecrets = openGoogleClientSecrets();
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder( httpTransport, JSON_FACTORY, clientSecrets, SCOPES)
-                .setDataStoreFactory(dataStoreFactory)
-                .setAccessType("offline")
-                .build();
-        Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
-        return new Tasks.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
-    }
+	private Tasks getService() throws IOException {
+		GoogleClientSecrets clientSecrets = openGoogleClientSecrets();
+		GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY,
+				clientSecrets, SCOPES).setDataStoreFactory(dataStoreFactory).setAccessType("offline").build();
+		Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+		return new Tasks.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
+	}
 
-    private void bump(String id, int nbDays) throws IOException {
-        Tasks taskService = getService();
-        Task task = taskService.tasks().get("@default", id).execute();
-        if ( task != null ) {
-            taskService.tasks().update("@default", task.getId(), pushDueDateTo(task, nbDays)).execute();
-            asyncRefresh();
-         }
-    }
+	private void bump(String id, int nbDays) throws IOException {
+		Tasks taskService = getService();
+		Task task = taskService.tasks().get("@default", id).execute();
+		if (task != null) {
+			taskService.tasks().update("@default", task.getId(), pushDueDateTo(task, nbDays)).execute();
+			asyncRefresh();
+		}
+	}
 
-    private Task pushDueDateTo(Task task, int nbDays ) {
-        long NB_SECONDS_BY_DAY = 86400L * 1000;
-        task.setDue(new DateTime(task.getDue().getValue() + (nbDays * NB_SECONDS_BY_DAY)));
-        return task;
-    }
+	private Task pushDueDateTo(Task task, int nbDays) {
+		long NB_SECONDS_BY_DAY = 86400L * 1000;
+		task.setDue(new DateTime(task.getDue().getValue() + (nbDays * NB_SECONDS_BY_DAY)));
+		return task;
+	}
 
-    @PUT
-    @Path("/{title}")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String addTaskss(@PathParam(value="title") String title) throws FileNotFoundException, IOException {
-        return insertTask(buildTask(title, "", today()));
-    }
+	@PUT
+	@Path("/{title}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String addTaskss(@PathParam(value = "title") String title) throws FileNotFoundException, IOException {
+		return insertTask(buildTask(title, "", today()));
+	}
 
-    @PUT
-    @Path("/{title}/{description}")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String addTasksWithNotes(@PathParam(value="title") String title, @PathParam(value="description") String description) throws FileNotFoundException, IOException {
-        return insertTask(buildTask(title, description, today()));
-    }
+	@PUT
+	@Path("/{title}/{description}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String addTasksWithNotes(@PathParam(value = "title") String title,
+			@PathParam(value = "description") String description) throws FileNotFoundException, IOException {
+		return insertTask(buildTask(title, description, today()));
+	}
 
-    @POST
-    @Path("/refresh")
-    @Produces(MediaType.TEXT_PLAIN)
-    public void httpRefresh() throws IOException, GeneralSecurityException {
-        asyncRefresh();
-    }
+	@POST
+	@Path("/refresh")
+	@Produces(MediaType.TEXT_PLAIN)
+	public void httpRefresh() throws IOException, GeneralSecurityException {
+		asyncRefresh();
+	}
 
+	@GET
+	@Path("/list/today")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String todayList() throws IOException, GeneralSecurityException {
+		final DateTime today = today();
+		return formatTaskList((t -> {
+			return isSameDay(today, t.getDue());
+		}), today);
+	}
 
-    @GET
-    @Path("/list/today")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String todayList() throws IOException, GeneralSecurityException {
-    	final DateTime today = today();
-        return formatTaskList((t -> { return isSameDay(today, t.getDue()); }), today);
-    }
+	@GET
+	@Path("/list/overdue")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String overdueList() throws IOException, GeneralSecurityException {
+		return formatOverdueTaskList((t -> {
+			return isDueDateBefore(today(), t.getDue());
+		}));
+	}
 
-    @GET
-    @Path("/list/overdue")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String overdueList() throws IOException, GeneralSecurityException {
-    	return formatOverdueTaskList((t -> { return isDueDateBefore(today(), t.getDue()); }));
-    }
+	@GET
+	@Path("/list/tomorrow")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String list() throws IOException, GeneralSecurityException {
+		final DateTime tomorrow = tomorrow();
+		return formatTaskList((t -> {
+			return isSameDay(tomorrow, t.getDue());
+		}), tomorrow);
+	}
 
-    @GET
-    @Path("/list/tomorrow")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String List() throws IOException, GeneralSecurityException {
-    	final DateTime tomorrow = tomorrow();
-    	return formatTaskList((t -> { return isSameDay(tomorrow, t.getDue()); }), tomorrow);
-    }
+	@GET
+	@Path("/search/title/{pattern}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String search(@PathParam(value = "pattern") String pattern) {
+		return formatTaskList(new Predicate<Task>() {
+			@Override
+			public boolean test(Task t) {
+				return t.getTitle().toLowerCase().contains(pattern.toLowerCase());
+			}
+		}, today());
+	}
 
+	@GET
+	@Path("/search/notes/{pattern}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String searchInNotes(@PathParam(value = "pattern") String pattern) {
+		return formatTaskList(new Predicate<Task>() {
+			@Override
+			public boolean test(Task t) {
+				return isStringNull(t.getNotes()).toLowerCase().contains(pattern.toLowerCase());
+			}
+		}, today());
+	}
 
-    @DELETE
-    @Path("/delete/{id}")
-    @Produces(MediaType.TEXT_PLAIN)
-    public void deleteTask(@PathParam(value = "id") String taskId) throws IOException {
-        System.out.println("Delete called with :" + taskId);
-        getService().tasks().delete("@default", taskId).execute();
-        asyncRefresh();
-    }
+	private static String isStringNull(String string) {
+		return string == null ? "" : string;
+	}
 
-    @POST
-    @Path("/bump/{id}")
-    @Produces(MediaType.TEXT_PLAIN)
-    public void bump(@PathParam(value="id") String id) throws IOException {
-        bump(id,1);
-    }
+	@DELETE
+	@Path("/delete/{id}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public void deleteTask(@PathParam(value = "id") String taskId) throws IOException {
+		System.out.println("Delete called with :" + taskId);
+		getService().tasks().delete("@default", taskId).execute();
+		asyncRefresh();
+	}
 
-    @POST
-    @Path("/bump/to/{id}/{nbDays}")
-    @Produces(MediaType.TEXT_PLAIN)
-    public void bumpTo(@PathParam(value="id") String id, @PathParam(value="nbDays") int nbDays) throws IOException {
-        bump(id,nbDays);
-    }
+	@POST
+	@Path("/bump/{id}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public void bump(@PathParam(value = "id") String id) throws IOException {
+		bump(id, 1);
+	}
 
-    @GET
-    @Path("/pid")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String pid() {
-        return String.valueOf(ProcessHandle.current().pid());
-    }
+	@POST
+	@Path("/bump/to/{id}/{nbDays}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public void bumpTo(@PathParam(value = "id") String id, @PathParam(value = "nbDays") int nbDays) throws IOException {
+		bump(id, nbDays);
+	}
 
-    private static boolean isSameDay(DateTime day, DateTime otherDay) {
-    	if ( areDatesNull(day, otherDay) ) {
-    		return false;
-    	}
-        return day.toStringRfc3339().substring(0,10).equals(otherDay.toStringRfc3339().substring(0,10));
-    }
+	@GET
+	@Path("/pid")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String pid() {
+		return String.valueOf(ProcessHandle.current().pid());
+	}
 
-    private static boolean areDatesNull(DateTime day, DateTime otherDay) {
-    	return (day == null || otherDay == null );
-    }
+	private static boolean isSameDay(DateTime day, DateTime otherDay) {
+		if (areDatesNull(day, otherDay)) {
+			return false;
+		}
+		return day.toStringRfc3339().substring(0, 10).equals(otherDay.toStringRfc3339().substring(0, 10));
+	}
 
-    private static SimpleDateFormat SIMPLE_DATE_FORMATTER = new SimpleDateFormat("yyyyMMdd");
-    private static int compareDateTo(Date date1, Date date2) {
-    	return SIMPLE_DATE_FORMATTER.format(date1).compareTo(SIMPLE_DATE_FORMATTER.format(date2));
-    }
+	private static boolean areDatesNull(DateTime day, DateTime otherDay) {
+		return (day == null || otherDay == null);
+	}
 
-    private static int compareDateTo(DateTime date1, DateTime date2) {
-    	return compareDateTo(new Date(date1.getValue()), new Date(date2.getValue()));
-    }
+	private static SimpleDateFormat SIMPLE_DATE_FORMATTER = new SimpleDateFormat("yyyyMMdd");
 
-    private static boolean isDueDateBefore(DateTime dueDate, DateTime date) {
-    	return areDatesNull(dueDate, date) ? false : (compareDateTo(dueDate, date) > 0);
-    }
+	private static int compareDateTo(Date date1, Date date2) {
+		return SIMPLE_DATE_FORMATTER.format(date1).compareTo(SIMPLE_DATE_FORMATTER.format(date2));
+	}
 
-    private static String formatTask(AtomicInteger counter, Task t) {
-    	return counter.getAndIncrement() + ") [" + t.getId() + "] " + t.getTitle();
-    }
+	private static int compareDateTo(DateTime date1, DateTime date2) {
+		return compareDateTo(new Date(date1.getValue()), new Date(date2.getValue()));
+	}
 
-    private static  String selectTasksToDisplay(Predicate<Task> predicate, AtomicInteger counter) {
-    	return tasks.values().stream()
-			.filter(t -> predicate.test(t)).map( t -> formatTask(counter, t))
-			.collect(Collectors.joining("\n"));
-    }
+	private static boolean isDueDateBefore(DateTime dueDate, DateTime date) {
+		return areDatesNull(dueDate, date) ? false : (compareDateTo(dueDate, date) > 0);
+	}
 
-    private static String formatTaskList(Predicate<Task> predicate, DateTime date) {
-        return formatOverdueTaskList("Tasks due on " + date + ":\n\n", predicate);
-    }
+	private static String formatTask(AtomicInteger counter, Task t) {
+		return counter.getAndIncrement() + ") [" + t.getId() + "] " + t.getTitle();
+	}
 
-    private static String formatOverdueTaskList(Predicate<Task> predicate) {
-    	return formatOverdueTaskList("Tasks overdue:\n\n", predicate);
-    }
+	private static String selectTasksToDisplay(Predicate<Task> predicate, AtomicInteger counter) {
+		return tasks.values().stream().filter(t -> predicate.test(t)).map(t -> formatTask(counter, t))
+				.collect(Collectors.joining("\n"));
+	}
 
-    private static String formatOverdueTaskList(String header, Predicate<Task> predicate) {
-        return formatOverdueTaskList(header,  predicate,  "\n\n");
-    }
+	private static String formatTaskList(Predicate<Task> predicate, DateTime date) {
+		return formatTaskList("Tasks due on " + date + ":\n\n", predicate);
+	}
 
-    private static String formatOverdueTaskList(String header, Predicate<Task> predicate, String footer) {
-        return header + selectTasksToDisplay(predicate, new AtomicInteger(1)) + footer;
-    }
+	private static String formatOverdueTaskList(Predicate<Task> predicate) {
+		return formatTaskList("Tasks overdue:\n\n", predicate);
+	}
+
+	private static String formatTaskList(String header, Predicate<Task> predicate) {
+		return formatTaskList(header, predicate, "\n\n");
+	}
+
+	private static String formatTaskList(String header, Predicate<Task> predicate, String footer) {
+		return header + selectTasksToDisplay(predicate, new AtomicInteger(1)) + footer;
+	}
 }
