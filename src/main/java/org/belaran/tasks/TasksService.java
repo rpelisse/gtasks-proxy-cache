@@ -115,12 +115,30 @@ public class TasksService {
     }
 
     private boolean refresh() throws IOException {
-        Tasks service = getService();
         tasks.clear();
-        for (Task t : service.tasks().list("@default").execute().getItems()  ) {
-            tasks.put(t.getId(),t);
-        }
+        LOGGER.info("Local cache for tasks is being refreshed.");
+        fetchAllItemsOfDefaultList(getService());
         return true;
+    }
+
+    private void fetchAllItemsOfDefaultList(Tasks service) throws IOException {
+        com.google.api.services.tasks.model.Tasks gtasks = null;
+        String token = null;
+        int nbItems = 0;
+        do {
+            gtasks = service.tasks().list("@default").setMaxResults(100l).setPageToken(token).execute();
+            if ( gtasks != null && gtasks.getItems() != null ) {
+	            for (Task t : gtasks.getItems()  ) {
+	            	LOGGER.fine("Adding to local cache:" + t.getTitle());
+	                tasks.put(t.getId(),t);
+	            }
+                nbItems += gtasks.getItems().size();
+                token = gtasks.getNextPageToken();
+            } else
+            	LOGGER.warning("Failed to retrieve any tasks!");
+        } while (token != null);
+        LOGGER.info("Cache refreshed with " + nbItems + " items fetched. (in cache: " + tasks.size() + " )." );
+        LOGGER.info("Due Date:" + today().toStringRfc3339());
     }
 
     private boolean asyncRefresh() throws IOException {
@@ -202,7 +220,6 @@ public class TasksService {
     	final DateTime today = today();
         return formatTaskList((t -> { return isSameDay(today, t.getDue()); }), today);
     }
-
 
     @GET
     @Path("/list/overdue")
