@@ -53,7 +53,7 @@ public class TasksService {
 
 	private static final String APPLICATION_NAME = "Google Tasks API Java Quickstart";
 	private static final String TASK_CLIENT_SECRET_FILE_ENV_VAR_NAME = "TASKS_CLIENT_SECRET";
-	private static final String TASK_PID_FILE_ENV_VAR_NAME = "TASKS_PIDFILE";
+	private static final String TASK_PID_FILE_ENV_VAR_NAME = "TASKSD_PIDFILE";
 	//
 
 	private final File DATA_STORE_DIR = new File(System.getProperty("user.home"), ".credentials/tasks-java-quickstart");
