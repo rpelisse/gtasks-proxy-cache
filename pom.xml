@@ -132,6 +132,14 @@
                         </sources>
                       </mapping>
                       <mapping>
+                        <directory>/opt/${project.artifactId}/</directory>
+                        <sources>
+                          <source>
+                            <location>src/main/bash/tasks</location>
+                          </source>
+                        </sources>
+                      </mapping>
+                      <mapping>
                         <directory>/etc/systemd/system/</directory>
                         <sources>
                           <source>
