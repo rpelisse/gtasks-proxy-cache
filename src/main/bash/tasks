@@ -30,7 +30,7 @@ call_gtasksks_proxy() {
 }
 
 task_to_perform='none'
-while getopts hlrtda:i:n:ip:bos:S: OPT; do
+while getopts hlrtda:i:n:ip:bos:S:D: OPT; do
   case "$OPT" in
     l)
         call_gtasksks_proxy 'list/today'
@@ -68,6 +68,9 @@ while getopts hlrtda:i:n:ip:bos:S: OPT; do
         ;;
     S)
         call_gtasksks_proxy "search/notes/$(encode_chars_for_url ${OPTARG})"
+        ;;
+    D)
+        call_gtasksks_proxy "desc/$(encode_chars_for_url ${OPTARG})"
         ;;
     h)
         usage

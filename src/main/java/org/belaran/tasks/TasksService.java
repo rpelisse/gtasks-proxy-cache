@@ -115,7 +115,8 @@ public class TasksService {
 	}
 
 	private boolean refresh() throws IOException {
-		tasks.clear();
+		if ( ! tasks.isEmpty() )
+			tasks.clear();
 		LOGGER.info("Local cache for tasks is being refreshed.");
 		fetchAllItemsOfDefaultList(getService());
 		return true;
@@ -283,7 +284,7 @@ public class TasksService {
 	public void bump(@PathParam(value = "id") String id) throws IOException {
 		bump(id, 1);
 	}
-
+	
 	@POST
 	@Path("/bump/to/{id}/{nbDays}")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -291,6 +292,18 @@ public class TasksService {
 		bump(id, nbDays);
 	}
 
+	@GET
+	@Path("/desc/{id}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String fetchTasksDesc(@PathParam(value = "id") String id) throws IOException {
+		if ( tasks.isEmpty() )
+			refresh();
+		if ( tasks.containsKey(id)) {
+			return formatTaskWithNotes(tasks.get(id));
+		}
+		throw new IllegalArgumentException("No tasks associated to ID: " + id);
+	}
+	
 	@GET
 	@Path("/pid")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -324,9 +337,17 @@ public class TasksService {
 	}
 
 	private static String formatTask(AtomicInteger counter, Task t) {
-		return counter.getAndIncrement() + ") [" + t.getId() + "] " + t.getTitle();
+		return counter.getAndIncrement() + ") " + formatTaskTitle(t);
 	}
 
+	
+	private static String formatTaskTitle(Task t) {
+		return "[" + t.getId() + "] " + t.getTitle();
+	}
+	private static String formatTaskWithNotes(Task t) {
+		return formatTaskTitle(t) + "\n" + t.getNotes();
+	}
+	
 	private static String selectTasksToDisplay(Predicate<Task> predicate, AtomicInteger counter) {
 		return tasks.values().stream().filter(t -> predicate.test(t)).map(t -> formatTask(counter, t))
 				.collect(Collectors.joining("\n"));
