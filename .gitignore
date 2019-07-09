@@ -4,3 +4,4 @@
 .settings/
 client_secret.json
 target/
+*.pid
