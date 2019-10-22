@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.time.format.DateTimeFormatter;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.DELETE;
@@ -354,8 +355,13 @@ public class TasksService {
 	}
 
 	private static String formatTaskList(Predicate<Task> predicate, DateTime date) {
-		return formatTaskList("Tasks due on " + date + ":\n\n", predicate);
+		return formatTaskList("Tasks due on " + formatDate(date) + ":\n\n", predicate);
 	}
+
+   private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy").withZone(java.time.ZoneId.of("CET"));
+   private static String formatDate(DateTime date) {
+       return formatter.format(new Date(date.getValue()).toInstant());
+   }
 
 	private static String formatOverdueTaskList(Predicate<Task> predicate) {
 		return formatTaskList("Tasks overdue:\n\n", predicate);
