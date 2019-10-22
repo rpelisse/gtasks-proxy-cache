@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -21,7 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.time.format.DateTimeFormatter;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.DELETE;
@@ -246,12 +246,12 @@ public class TasksService {
 	@Path("/search/title/{pattern}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String search(@PathParam(value = "pattern") String pattern) {
-		return formatTaskList(new Predicate<Task>() {
+		return formatSearchResultList(new Predicate<Task>() {
 			@Override
 			public boolean test(Task t) {
 				return t.getTitle().toLowerCase().contains(pattern.toLowerCase());
 			}
-		}, today());
+		});
 	}
 
 	@GET
@@ -300,7 +300,7 @@ public class TasksService {
 		if ( tasks.isEmpty() )
 			refresh();
 		if ( tasks.containsKey(id)) {
-			return formatTaskWithNotes(tasks.get(id));
+			return formatTaskWithNotes(tasks.get(id), (Task t) -> { return "[" + t.getId() + "] " + t.getTitle();});
 		}
 		throw new IllegalArgumentException("No tasks associated to ID: " + id);
 	}
@@ -337,34 +337,41 @@ public class TasksService {
 		return areDatesNull(dueDate, date) ? false : (compareDateTo(dueDate, date) > 0);
 	}
 
-	private static String formatTask(AtomicInteger counter, Task t) {
-		return counter.getAndIncrement() + ") " + formatTaskTitle(t);
+	private static String formatTaskWithNumber(AtomicInteger counter, Task t, TaskFormatter taskFormatterFunction) {
+		return counter.getAndIncrement() + ") " + taskFormatterFunction.formatTasks(t);
 	}
 
 
-	private static String formatTaskTitle(Task t) {
-		return "[" + t.getId() + "] " + t.getTitle();
-	}
-	private static String formatTaskWithNotes(Task t) {
-		return formatTaskTitle(t) + "\n" + t.getNotes();
+	private static String formatTaskWithNotes(Task t, TaskFormatter taskFormatterFunction) {
+		return taskFormatterFunction.formatTasks(t) + "\n" + t.getNotes();
 	}
 
 	private static String selectTasksToDisplay(Predicate<Task> predicate, AtomicInteger counter) {
-		return tasks.values().stream().filter(t -> predicate.test(t)).map(t -> formatTask(counter, t))
+		return selectTasksToDisplay(predicate, counter, (Task task) -> {return "[" + task.getId() + "] " + task.getTitle();});
+	}
+
+	private static String selectTasksToDisplay(Predicate<Task> predicate, AtomicInteger counter, TaskFormatter taskFormatterFunction) {
+		return tasks.values().stream().filter(t -> predicate.test(t)).map(t -> formatTaskWithNumber(counter, t, taskFormatterFunction ))
 				.collect(Collectors.joining("\n"));
+	}
+
+	private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+			.withZone(java.time.ZoneId.of("CET"));
+
+	private static String formatDate(DateTime date) {
+		return formatter.format(new Date(date.getValue()).toInstant());
 	}
 
 	private static String formatTaskList(Predicate<Task> predicate, DateTime date) {
 		return formatTaskList("Tasks due on " + formatDate(date) + ":\n\n", predicate);
 	}
 
-   private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy").withZone(java.time.ZoneId.of("CET"));
-   private static String formatDate(DateTime date) {
-       return formatter.format(new Date(date.getValue()).toInstant());
-   }
-
 	private static String formatOverdueTaskList(Predicate<Task> predicate) {
 		return formatTaskList("Tasks overdue:\n\n", predicate);
+	}
+
+	private String formatSearchResultList(Predicate<Task> predicate) {
+		return formatTaskList("Results:\n\n", predicate, (Task t) -> { 	return "[" + t.getId() + "] " + t.getTitle() + ", due on " + formatDate(t.getDue()) + "\n";} ,"");
 	}
 
 	private static String formatTaskList(String header, Predicate<Task> predicate) {
@@ -373,5 +380,22 @@ public class TasksService {
 
 	private static String formatTaskList(String header, Predicate<Task> predicate, String footer) {
 		return header + selectTasksToDisplay(predicate, new AtomicInteger(1)) + footer;
+	}
+
+	private static String formatTaskList(String header, Predicate<Task> predicate, TaskFormatter taskFormatterFunction, String footer) {
+		return header + selectTasksToDisplay(predicate, new AtomicInteger(1), taskFormatterFunction) + footer;
+	}
+
+	interface TaskFormatter {
+		public String formatTasks(Task t);
+	}
+
+	class DefaultTaskFormatter implements TaskFormatter {
+
+		@Override
+		public String formatTasks(Task t) {
+			return "[" + t.getId() + "] " + t.getTitle();
+		}
+
 	}
 }
