@@ -6,7 +6,7 @@
 
     <groupId>org.belaran</groupId>
     <artifactId>gtasks-proxy</artifactId>
-    <version>1.4</version>
+    <version>1.5</version>
     <properties>
         <quarkus.version>0.16.0</quarkus.version>
         <google.tasks.version>v1-rev58-1.25.0</google.tasks.version>
