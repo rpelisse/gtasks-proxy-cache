@@ -8,7 +8,7 @@
     <artifactId>gtasks-proxy</artifactId>
     <version>1.5</version>
     <properties>
-        <quarkus.version>0.16.0</quarkus.version>
+        <quarkus.version>1.0.0.CR1</quarkus.version>
         <google.tasks.version>v1-rev58-1.25.0</google.tasks.version>
         <google.api.version>1.25.0</google.api.version>
         <surefire.version>2.22.0</surefire.version>
@@ -33,10 +33,6 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-resteasy-jsonb</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-smallrye-rest-client</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
