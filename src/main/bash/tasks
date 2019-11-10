@@ -74,7 +74,7 @@ while getopts hlrtda:i:n:ip:bos:S:D:T: OPT; do
         ;;
     T)
         task_to_perform='tag'
-        tag_id="${OPT_ARG}"
+        tag_id="${OPTARG}"
         if [ -z "${tag_id}" ]; then
           echo "Missing tag id! Aborting."
           exit 5
