@@ -121,7 +121,15 @@ public class TasksService {
 			tasks.clear();
 		LOGGER.info("Local cache for tasks is being refreshed.");
 		fetchAllItemsOfDefaultList(getService());
+		ifListStillEmptySomethingWentWrongTryAgain();
 		return true;
+	}
+
+	private void ifListStillEmptySomethingWentWrongTryAgain() throws IOException {
+		if ( tasks.isEmpty() ) {
+			LOGGER.info("List empty after refreshing, trying again.");
+			fetchAllItemsOfDefaultList(getService());
+		}
 	}
 
 	private void fetchAllItemsOfDefaultList(Tasks service) throws IOException {
