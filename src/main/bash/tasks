@@ -30,7 +30,7 @@ call_gtasksks_proxy() {
 }
 
 task_to_perform='none'
-while getopts hlrtda:i:n:ip:bos:S:D: OPT; do
+while getopts hlrtda:i:n:ip:bos:S:D:T: OPT; do
   case "$OPT" in
     l)
         call_gtasksks_proxy 'list/today'
@@ -72,6 +72,14 @@ while getopts hlrtda:i:n:ip:bos:S:D: OPT; do
     D)
         call_gtasksks_proxy "desc/$(encode_chars_for_url ${OPTARG})"
         ;;
+    T)
+        task_to_perform='tag'
+        tag_id="${OPT_ARG}"
+        if [ -z "${tag_id}" ]; then
+          echo "Missing tag id! Aborting."
+          exit 5
+        fi
+        ;;
     h)
         usage
         exit 0
@@ -99,4 +107,8 @@ fi
 
 if [ "${task_to_perform}" = 'delete' ]; then
   call_gtasksks_proxy "delete/${TASK_ID}" 'DELETE'
+fi
+
+if [ "${task_to_perform}" = 'tag' ]; then
+  call_gtasksks_proxy "tag/${TASK_ID}/${tag_id}" 'POST'
 fi

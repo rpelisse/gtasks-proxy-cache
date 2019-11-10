@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -70,6 +71,8 @@ public class TasksService {
 
 	private static final Map<String, Task> tasks = new ConcurrentHashMap<String, Task>();
 
+	private static Map<String,String> TAGS_INDEXED_BY_LETTER_ID = new HashMap<String, String>(3);
+
 	private FileDataStoreFactory dataStoreFactory;
 	private NetHttpTransport httpTransport;
 
@@ -114,7 +117,20 @@ public class TasksService {
 		dataStoreFactory = new FileDataStoreFactory(DATA_STORE_DIR);
 		httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 
+		populateTagsIndexedMap();
+
 		this.refresh();
+	}
+
+	private void populateTagsIndexedMap() {
+		TasksService.TAGS_INDEXED_BY_LETTER_ID.put("phone", "☎️");
+		TasksService.TAGS_INDEXED_BY_LETTER_ID.put("dollar", "💲");
+		TasksService.TAGS_INDEXED_BY_LETTER_ID.put("blocker", "⛔");
+		TasksService.TAGS_INDEXED_BY_LETTER_ID.put("rpg","🎲");
+		TasksService.TAGS_INDEXED_BY_LETTER_ID.put("email", "✉️");
+		TasksService.TAGS_INDEXED_BY_LETTER_ID.put("cat", "🐹");
+		TasksService.TAGS_INDEXED_BY_LETTER_ID.put("music", "🎶");
+		TasksService.TAGS_INDEXED_BY_LETTER_ID.put("food", "🍆");
 	}
 
 	private boolean refresh() throws IOException {
@@ -218,6 +234,49 @@ public class TasksService {
 	public String addTasksWithNotes(@PathParam(value = "title") String title,
 			@PathParam(value = "description") String description) throws FileNotFoundException, IOException {
 		return insertTask(buildTask(title, description, today()));
+	}
+
+	@POST
+	@Path("/tag/{id}/{tag}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public void tagTask(@PathParam(value = "id") String id, @PathParam(value = "tag") String tag) throws IOException, GeneralSecurityException {
+		tagAndUpdateTask(getSymbolForTag(tag),retrieveTaskById(id));
+		asyncRefresh();
+	}
+
+	@GET
+	@Path("/tag/list")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String supportedTagList() throws IOException, GeneralSecurityException {
+		return TasksService.TAGS_INDEXED_BY_LETTER_ID.toString();
+	}
+
+	private void tagAndUpdateTask(String symbol, Task task) throws IOException {
+		getService().tasks()
+				.update(MAIN_TASK_LIST_ID, task.getId(), updateTaskTitle(task, tagTaskTitle(symbol, task.getTitle())))
+				.execute();
+	}
+
+	private static Task updateTaskTitle(Task task, String newTitle) {
+		task.setTitle(newTitle);
+		return task;
+	}
+
+	private static String tagTaskTitle(String symbol, String title) {
+		return symbol + " " + title;
+	}
+
+	private String getSymbolForTag(String tag) {
+		return TasksService.TAGS_INDEXED_BY_LETTER_ID.get(getKeyAssociatedToTagId(tag));
+	}
+
+	private String getKeyAssociatedToTagId(String tag) {
+		return TasksService.TAGS_INDEXED_BY_LETTER_ID.keySet().stream().filter(key -> key.startsWith(tag)).findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("No tag associated to :" + tag));
+	}
+
+	private Task retrieveTaskById(String id) throws IOException {
+		return Optional.of(getService().tasks().get(MAIN_TASK_LIST_ID, id).execute()).orElseThrow(() -> new IllegalArgumentException("No task associated to id " + id));
 	}
 
 	@POST
