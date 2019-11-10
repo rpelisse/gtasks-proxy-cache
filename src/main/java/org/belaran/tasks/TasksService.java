@@ -207,12 +207,9 @@ public class TasksService {
 	}
 
 	private void bump(String id, int nbDays) throws IOException {
-		Tasks taskService = getService();
-		Task task = taskService.tasks().get("@default", id).execute();
-		if (task != null) {
-			taskService.tasks().update("@default", task.getId(), pushDueDateTo(task, nbDays)).execute();
-			asyncRefresh();
-		}
+		Task task = retrieveTaskById(id);
+		getService().tasks().update(MAIN_TASK_LIST_ID, task.getId(), pushDueDateTo(task, nbDays)).execute();
+		asyncRefresh();
 	}
 
 	private Task pushDueDateTo(Task task, int nbDays) {
