@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -177,12 +178,16 @@ public class TasksService {
 		return id;
 	}
 
+	private Optional<Tasks> taskService = Optional.empty();
 	private Tasks getService() throws IOException {
-		GoogleClientSecrets clientSecrets = openGoogleClientSecrets();
-		GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY,
-				clientSecrets, SCOPES).setDataStoreFactory(dataStoreFactory).setAccessType("offline").build();
-		Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
-		return new Tasks.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build();
+		if ( taskService.isEmpty() ) {
+			GoogleClientSecrets clientSecrets = openGoogleClientSecrets();
+			GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY,
+					clientSecrets, SCOPES).setDataStoreFactory(dataStoreFactory).setAccessType("offline").build();
+			Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+			taskService = Optional.of(new Tasks.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName(APPLICATION_NAME).build());
+		}
+		return taskService.get();
 	}
 
 	private void bump(String id, int nbDays) throws IOException {
