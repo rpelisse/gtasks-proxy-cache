@@ -55,7 +55,6 @@ public class TasksService {
 	private static final String APPLICATION_NAME = "Google Tasks API Java Quickstart";
 	private static final String TASK_CLIENT_SECRET_FILE_ENV_VAR_NAME = "TASKS_CLIENT_SECRET";
 	private static final String TASK_PID_FILE_ENV_VAR_NAME = "TASKSD_PIDFILE";
-	//
 
 	private final File DATA_STORE_DIR = new File(System.getProperty("user.home"), ".credentials/tasks-java-quickstart");
 	private final static String CLIENT_SECRET_FILENAME = System.getenv(TASK_CLIENT_SECRET_FILE_ENV_VAR_NAME);
@@ -63,6 +62,8 @@ public class TasksService {
 	private final static JacksonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
 	private final static List<String> SCOPES = Arrays.asList(TasksScopes.TASKS);
 	private static final long ONE_DAY__IN_MILLIS = 86400000;
+
+	private static final String MAIN_TASK_LIST_ID = "@default";
 
 	private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -128,7 +129,7 @@ public class TasksService {
 		String token = null;
 		int nbItems = 0;
 		do {
-			gtasks = service.tasks().list("@default").setMaxResults(100l).setPageToken(token).execute();
+			gtasks = service.tasks().list(MAIN_TASK_LIST_ID).setMaxResults(100l).setPageToken(token).execute();
 			if (gtasks != null && gtasks.getItems() != null) {
 				for (Task t : gtasks.getItems()) {
 					LOGGER.fine("Adding to local cache:" + t.getTitle());
@@ -163,7 +164,7 @@ public class TasksService {
 	}
 
 	private String insertTask(Task task) throws IOException {
-		String id = getService().tasks().insert("@default", task).execute().getId();
+		String id = getService().tasks().insert(MAIN_TASK_LIST_ID, task).execute().getId();
 		asyncRefresh();
 		return id;
 	}
@@ -275,7 +276,7 @@ public class TasksService {
 	@Produces(MediaType.TEXT_PLAIN)
 	public void deleteTask(@PathParam(value = "id") String taskId) throws IOException {
 		System.out.println("Delete called with :" + taskId);
-		getService().tasks().delete("@default", taskId).execute();
+		getService().tasks().delete(MAIN_TASK_LIST_ID, taskId).execute();
 		asyncRefresh();
 	}
 
