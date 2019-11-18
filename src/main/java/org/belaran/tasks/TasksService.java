@@ -130,6 +130,8 @@ public class TasksService {
 		TasksService.TAGS_INDEXED_BY_LETTER_ID.put("email", "✉️");
 		TasksService.TAGS_INDEXED_BY_LETTER_ID.put("cat", "🐹");
 		TasksService.TAGS_INDEXED_BY_LETTER_ID.put("music", "🎶");
+		TasksService.TAGS_INDEXED_BY_LETTER_ID.put("house", "🏠");
+		TasksService.TAGS_INDEXED_BY_LETTER_ID.put("print", "📄");
 		TasksService.TAGS_INDEXED_BY_LETTER_ID.put("food", "🍆");
 	}
 

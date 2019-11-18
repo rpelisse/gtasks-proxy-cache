@@ -71,6 +71,7 @@ while getopts hlrtda:i:n:ip:bos:S:D:T: OPT; do
         ;;
     D)
         call_gtasksks_proxy "desc/$(encode_chars_for_url ${OPTARG})"
+        echo ''
         ;;
     T)
         task_to_perform='tag'
