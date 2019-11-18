@@ -66,6 +66,7 @@ public class TasksService {
 	private static final long ONE_DAY__IN_MILLIS = 86400000;
 
 	private static final String MAIN_TASK_LIST_ID = "@default";
+	private static final String EOL = "\n";
 
 	private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -415,7 +416,7 @@ public class TasksService {
 
 
 	private static String formatTaskWithNotes(Task t, TaskFormatter taskFormatterFunction) {
-		return taskFormatterFunction.formatTasks(t) + "\n" + t.getNotes();
+		return taskFormatterFunction.formatTasks(t) + EOL + t.getNotes() + EOL;
 	}
 
 	private static String selectTasksToDisplay(Predicate<Task> predicate, AtomicInteger counter) {
@@ -424,7 +425,7 @@ public class TasksService {
 
 	private static String selectTasksToDisplay(Predicate<Task> predicate, AtomicInteger counter, TaskFormatter taskFormatterFunction) {
 		return tasks.values().stream().filter(t -> predicate.test(t)).map(t -> formatTaskWithNumber(counter, t, taskFormatterFunction ))
-				.collect(Collectors.joining("\n"));
+				.collect(Collectors.joining(EOL));
 	}
 
 	private static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
@@ -435,19 +436,19 @@ public class TasksService {
 	}
 
 	private static String formatTaskList(Predicate<Task> predicate, DateTime date) {
-		return formatTaskList("Tasks due on " + formatDate(date) + ":\n\n", predicate);
+		return formatTaskList("Tasks due on " + formatDate(date) + ":" + EOL + EOL, predicate);
 	}
 
 	private static String formatOverdueTaskList(Predicate<Task> predicate) {
-		return formatTaskList("Tasks overdue:\n\n", predicate);
+		return formatTaskList("Tasks overdue:" + EOL + EOL, predicate);
 	}
 
 	private String formatSearchResultList(Predicate<Task> predicate) {
-		return formatTaskList("Results:\n\n", predicate, (Task t) -> { 	return "[" + t.getId() + "] " + t.getTitle() + ", due on " + formatDate(t.getDue()) + "\n";} ,"");
+		return formatTaskList("Results:" + EOL + EOL, predicate, (Task t) -> { 	return "[" + t.getId() + "] " + t.getTitle() + ", due on " + formatDate(t.getDue()) + EOL;} ,"");
 	}
 
 	private static String formatTaskList(String header, Predicate<Task> predicate) {
-		return formatTaskList(header, predicate, "\n\n");
+		return formatTaskList(header, predicate, EOL + EOL);
 	}
 
 	private static String formatTaskList(String header, Predicate<Task> predicate, String footer) {
