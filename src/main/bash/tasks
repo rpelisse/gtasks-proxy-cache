@@ -18,17 +18,17 @@ encode_chars_for_url() {
 call_gtasksks_proxy() {
   local path=${1}
   local method=${2:-'GET'}
-  local data=${3}
+  local data=${3:-''}
   local content_type=${4:-'text/plain'}
 
+  local url="${GTASK_PROXY_URL}/${path}"
+
   if [ -n "${data}" ]; then
-      set_content_type="-H Content-Type: ${content_type}"
-      set_data="-d ${data}"
+    status=$(expr 0 + $(curl -s -w "%{http_code}\n" -X "${method}" -H "Content-Type: ${content_type}" -d "${data}" "${url}" -o "${RESULT_FILE}"))
   else
-      set_content_type=""
+    status=$(expr 0 + $(curl -s -w "%{http_code}\n" -X "${method}" "${url}" -o "${RESULT_FILE}"))
   fi
 
-  status=$(expr 0 + $(curl -s -w "%{http_code}\n" -X "${method}" ${set_content_type} "${GTASK_PROXY_URL}/${1}" ${set_data}-o "${RESULT_FILE}"))
   if [[ ${status} =~ ^2[0-9][0-9]$ ]] ; then
     cat "${RESULT_FILE}"
     exit 0
@@ -38,8 +38,9 @@ call_gtasksks_proxy() {
   fi
 }
 
+task_url='none'
 task_to_perform='none'
-while getopts hlrtda:i:n:ip:bos:S:D:T: OPT; do
+while getopts hlrtda:i:n:ip:bos:S:D:T:u: OPT; do
   case "$OPT" in
     l)
         call_gtasksks_proxy 'list/today'
@@ -90,12 +91,19 @@ while getopts hlrtda:i:n:ip:bos:S:D:T: OPT; do
           exit 5
         fi
         ;;
+    u)
+        task_url=${OPTARG}
+        ;;
     h)
         usage
         exit 0
         ;;
   esac
 done
+
+if [ "${task_url}" != 'none' ]; then
+  call_gtasksks_proxy "/add/from/url" 'PUT' "${task_url}"
+fi
 
 readonly NOTES=${NOTES:-""}
 if [ -n "${TASK_ID}" -a -n "${NOTES}" ] ; then

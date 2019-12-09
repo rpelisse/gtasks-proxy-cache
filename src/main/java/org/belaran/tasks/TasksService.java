@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
@@ -225,9 +227,34 @@ public class TasksService {
 	@PUT
 	@Path("/{title}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String addTaskss(@PathParam(value = "title") String title) throws FileNotFoundException, IOException {
+	public String addTasks(@PathParam(value = "title") String title) throws FileNotFoundException, IOException {
 		return insertTask(buildTask(title, "", today()));
 	}
+
+	private String getLastSegmentOfURLPath(URL url) {
+		return url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
+	}
+
+	private String insertURLTask(URL taskURL) throws FileNotFoundException, IOException {
+		return insertTask(buildTask(getLastSegmentOfURLPath(taskURL), taskURL.toString(), today()));
+	}
+
+	private URL turnTitleIntoAnURL(String urlAsString) {
+		try {
+			return new URL(urlAsString);
+		} catch ( MalformedURLException e ) {
+			throw new IllegalArgumentException("Invalid URL:" + urlAsString);
+		}
+	}
+
+	@PUT
+	@Path("/add/from/url/")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.TEXT_PLAIN)
+	public String addTasksAsUrl(String urlAsString) throws FileNotFoundException, IOException {
+		return insertURLTask(turnTitleIntoAnURL(urlAsString));
+	}
+
 
 	@PUT
 	@Path("/{title}/{description}")
