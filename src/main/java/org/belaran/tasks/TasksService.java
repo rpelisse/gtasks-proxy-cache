@@ -270,9 +270,9 @@ public class TasksService {
 	@Consumes(MediaType.TEXT_PLAIN)
 	public String addNotesToTask(@PathParam(value = "id") String id, String notes) throws FileNotFoundException, IOException {
 		Task task = retrieveTaskById(id);
-		if ( task == null || task.getId().equals("") )
+		if ( task == null )
 			throw new IllegalArgumentException("No tasks associated to id:" + id);
-		if (! task.getNotes().isBlank() )
+		if (task.getNotes() == null || ! task.getNotes().isBlank() )
 			notes = task.getNotes() + EOL + notes;
 		task.setNotes(notes);
 		return updateTask(task).getId();
