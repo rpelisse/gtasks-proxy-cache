@@ -31,6 +31,7 @@ call_gtasksks_proxy() {
 
   if [[ ${status} =~ ^2[0-9][0-9]$ ]] ; then
     cat "${RESULT_FILE}"
+    echo ''
     exit 0
   else
     echo "Request failed with status:${status}."
