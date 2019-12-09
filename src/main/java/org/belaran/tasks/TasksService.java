@@ -38,6 +38,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
 import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
@@ -236,7 +239,13 @@ public class TasksService {
 	}
 
 	private String insertURLTask(URL taskURL) throws FileNotFoundException, IOException {
-		return insertTask(buildTask(getLastSegmentOfURLPath(taskURL), taskURL.toString(), today()));
+		try {
+			Document doc = Jsoup.connect(taskURL.toString()).get();
+			String title = doc.title();
+			return insertTask(buildTask(title, taskURL.toString(), today()));
+		} catch ( IOException e ) {
+			return insertTask(buildTask(getLastSegmentOfURLPath(taskURL), taskURL.toString(), today()));
+		}
 	}
 
 	private URL turnTitleIntoAnURL(String urlAsString) {
