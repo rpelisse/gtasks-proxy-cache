@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -237,6 +238,20 @@ public class TasksService {
 	}
 
 	@POST
+	@Path("/notes/{id}")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.TEXT_PLAIN)
+	public String addNotesToTask(@PathParam(value = "id") String id, String notes) throws FileNotFoundException, IOException {
+		Task task = retrieveTaskById(id);
+		if ( task == null || task.getId().equals("") )
+			throw new IllegalArgumentException("No tasks associated to id:" + id);
+		if (! task.getNotes().isBlank() )
+			notes = task.getNotes() + EOL + notes;
+		task.setNotes(notes);
+		return updateTask(task).getId();
+	}
+
+	@POST
 	@Path("/tag/{id}/{tag}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public void tagTask(@PathParam(value = "id") String id, @PathParam(value = "tag") String tag) throws IOException, GeneralSecurityException {
@@ -257,11 +272,17 @@ public class TasksService {
 				.execute();
 	}
 
+	private Task updateTask(Task task) throws IOException {
+		return getService().tasks()
+				.update(MAIN_TASK_LIST_ID, task.getId(), task)
+				.execute();
+	}
+
 	private static Task updateTaskTitle(Task task, String newTitle) {
 		task.setTitle(newTitle);
 		return task;
 	}
-
+	
 	private static String tagTaskTitle(String symbol, String title) {
 		return symbol + " " + title;
 	}
