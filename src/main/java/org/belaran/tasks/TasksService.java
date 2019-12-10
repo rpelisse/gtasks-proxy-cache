@@ -522,7 +522,7 @@ public class TasksService {
 	}
 
 	private static String formatTaskList(String header, Predicate<Task> predicate) {
-		return formatTaskList(header, predicate, EOL + EOL);
+		return formatTaskList(header, predicate, EOL);
 	}
 
 	private static String formatTaskList(String header, Predicate<Task> predicate, String footer) {
