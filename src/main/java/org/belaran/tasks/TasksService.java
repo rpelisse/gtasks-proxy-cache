@@ -284,7 +284,25 @@ public class TasksService {
 		if (task.getNotes() == null || ! task.getNotes().isBlank() )
 			notes = task.getNotes() + EOL + notes;
 		task.setNotes(notes);
-		return updateTask(task).getId();
+		return asyncRefresh(updateTask(task).getId());
+	}
+
+
+	@POST
+	@Path("/rename/{id}")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.TEXT_PLAIN)
+	public String renameTask(@PathParam(value = "id") String id, String title) throws FileNotFoundException, IOException {
+		Task task = retrieveTaskById(id);
+		if ( task == null )
+			throw new IllegalArgumentException("No tasks associated to id:" + id);
+		task.setTitle(title);
+		return asyncRefresh(updateTask(task).getId());
+	}
+
+	private <T> T asyncRefresh(T object) throws IOException {
+		asyncRefresh();
+		return object;
 	}
 
 	@POST

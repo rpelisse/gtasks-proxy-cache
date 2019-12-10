@@ -39,9 +39,12 @@ call_gtasksks_proxy() {
   fi
 }
 
+new_name=''
 task_url='none'
 task_to_perform='none'
-while getopts hlrtda:i:n:ip:bos:S:D:T:u: OPT; do
+NOTES=''
+TASK_ID=''
+while getopts hlrtda:i:n:ip:bos:S:D:T:u:R: OPT; do
   case "$OPT" in
     l)
         call_gtasksks_proxy 'list/today'
@@ -95,6 +98,10 @@ while getopts hlrtda:i:n:ip:bos:S:D:T:u: OPT; do
     u)
         task_url=${OPTARG}
         ;;
+    R)
+        task_to_perform='rename'
+        new_name=${OPTARG}
+        ;;
     h)
         usage
         exit 0
@@ -103,12 +110,16 @@ while getopts hlrtda:i:n:ip:bos:S:D:T:u: OPT; do
 done
 
 if [ "${task_url}" != 'none' ]; then
-  call_gtasksks_proxy "/add/from/url" 'PUT' "${task_url}"
+  call_gtasksks_proxy "add/from/url" 'PUT' "${task_url}"
 fi
 
 readonly NOTES=${NOTES:-""}
 if [ -n "${TASK_ID}" -a -n "${NOTES}" ] ; then
   call_gtasksks_proxy "/notes/${TASK_ID}" 'POST' "${NOTES}"
+fi
+
+if [ "${task_to_perform}" = 'rename' ]; then
+  call_gtasksks_proxy "rename/${TASK_ID}" 'POST' "${new_name}"
 fi
 
 if [ "${task_to_perform}" = 'add-task' ]; then
