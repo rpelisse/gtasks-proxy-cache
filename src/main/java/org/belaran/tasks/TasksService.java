@@ -240,6 +240,8 @@ public class TasksService {
 		try {
 			Document doc = Jsoup.connect(taskURL.toString()).get();
 			String title = doc.title();
+			if ( title.startsWith("Login server redirect"))
+				throw new IOException("Can't add URL due to authentification");
 			return insertTask(buildTask(title, taskURL.toString(), today()));
 		} catch ( IOException e ) {
 			return insertTask(buildTask(getLastSegmentOfURLPath(taskURL), taskURL.toString(), today()));
