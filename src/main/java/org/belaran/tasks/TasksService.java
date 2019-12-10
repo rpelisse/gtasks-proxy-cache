@@ -198,9 +198,7 @@ public class TasksService {
 	}
 
 	private String insertTask(Task task) throws IOException {
-		String id = getService().tasks().insert(MAIN_TASK_LIST_ID, task).execute().getId();
-		asyncRefresh();
-		return id;
+		return asyncRefresh(getService().tasks().insert(MAIN_TASK_LIST_ID, task).execute().getId());
 	}
 
 	private Optional<Tasks> taskService = Optional.empty();
@@ -261,7 +259,7 @@ public class TasksService {
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.TEXT_PLAIN)
 	public String addTasksAsUrl(String urlAsString) throws FileNotFoundException, IOException {
-		return insertURLTask(turnTitleIntoAnURL(urlAsString));
+		return asyncRefresh(insertURLTask(turnTitleIntoAnURL(urlAsString)));
 	}
 
 
@@ -423,8 +421,7 @@ public class TasksService {
 	@Produces(MediaType.TEXT_PLAIN)
 	public void deleteTask(@PathParam(value = "id") String taskId) throws IOException {
 		System.out.println("Delete called with :" + taskId);
-		getService().tasks().delete(MAIN_TASK_LIST_ID, taskId).execute();
-		asyncRefresh();
+		asyncRefresh(getService().tasks().delete(MAIN_TASK_LIST_ID, taskId).execute());
 	}
 
 	@POST
