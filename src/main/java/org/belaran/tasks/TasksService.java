@@ -238,8 +238,7 @@ public class TasksService {
 
 	private String insertURLTask(URL taskURL) throws FileNotFoundException, IOException {
 		try {
-			Document doc = Jsoup.connect(taskURL.toString()).get();
-			String title = doc.title();
+			String title = Jsoup.connect(taskURL.toString()).get().title();
 			if ( title.startsWith("Login server redirect"))
 				throw new IOException("Can't add URL due to authentification");
 			return insertTask(buildTask(title, taskURL.toString(), today()));
