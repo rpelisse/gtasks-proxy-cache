@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
@@ -42,13 +40,14 @@ public class TasksServiceEndpoint {
 
 	@Inject
 	GTasksServiceClient gtasksClient;
-	
+
+	@Inject
+	TasksCache tasks;
+
 	private final static Logger LOGGER = Logger.getLogger(TasksServiceEndpoint.class.getName());
 
 	private static final String TASK_PID_FILE_ENV_VAR_NAME = "TASKSD_PIDFILE";
 	private final static String PID_FILE_NAME = System.getenv(TASK_PID_FILE_ENV_VAR_NAME);
-
-	private static final Map<String, Task> tasks = new ConcurrentHashMap<String, Task>();
 
 	public TasksServiceEndpoint() throws IOException {
 		LOGGER.info("PID Filename:" + PID_FILE_NAME);
@@ -62,18 +61,18 @@ public class TasksServiceEndpoint {
 	}
 
 	private boolean refresh() throws IOException {
-		if ( ! tasks.isEmpty() )
-			tasks.clear();
+		if ( ! tasks.getTasks().isEmpty() )
+			tasks.getTasks().clear();
 		LOGGER.info("Local cache for tasks is being refreshed.");
-		tasks.putAll(gtasksClient.fetchAllItemsOfDefaultList());
+		tasks.getTasks().putAll(gtasksClient.fetchAllItemsOfDefaultList());
 		ifListStillEmptySomethingWentWrongTryAgain();
 		return true;
 	}
 
 	private void ifListStillEmptySomethingWentWrongTryAgain() throws IOException {
-		if ( tasks.isEmpty() ) {
+		if ( tasks.getTasks().isEmpty() ) {
 			LOGGER.info("List empty after refreshing, trying again.");
-			tasks.putAll(gtasksClient.fetchAllItemsOfDefaultList());
+			tasks.getTasks().putAll(gtasksClient.fetchAllItemsOfDefaultList());
 		}
 	}
 
@@ -86,7 +85,7 @@ public class TasksServiceEndpoint {
 		return asyncRefresh(gtasksClient.insertTask(task));
 	}
 
-	private void asyncBump(String id, int nbDays) throws IOException {		
+	private void asyncBump(String id, int nbDays) throws IOException {
 		gtasksClient.bumpTaskById(id, nbDays);
 		asyncRefresh();
 	}
@@ -161,7 +160,7 @@ public class TasksServiceEndpoint {
 	public String supportedTagList() throws IOException, GeneralSecurityException {
 		return TagUtils.TAGS_INDEXED_BY_LETTER_ID.toString();
 	}
-	
+
 	@POST
 	@Path("/refresh")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -174,16 +173,16 @@ public class TasksServiceEndpoint {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String todayList() throws IOException, GeneralSecurityException {
 		final DateTime today = today();
-		return FormatUtils.formatTaskList(tasks.values(), (t -> {
+		return FormatUtils.formatTaskList(tasks.getTasks().values(), (t -> {
 			return DateUtils.isSameDay(today, t.getDue());
 		}), today);
 	}
-	
+
 	@GET
 	@Path("/list/overdue")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String overdueList() throws IOException, GeneralSecurityException {
-		return FormatUtils.formatOverdueTaskList(tasks.values(), (t -> {
+		return FormatUtils.formatOverdueTaskList(tasks.getTasks().values(), (t -> {
 			return DateUtils.isDueDateBefore(today(), t.getDue());
 		}));
 	}
@@ -193,7 +192,7 @@ public class TasksServiceEndpoint {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String list() throws IOException, GeneralSecurityException {
 		final DateTime tomorrow = tomorrow();
-		return FormatUtils.formatTaskList(tasks.values(),(t -> {
+		return FormatUtils.formatTaskList(tasks.getTasks().values(),(t -> {
 			return DateUtils.isSameDay(tomorrow, t.getDue());
 		}), tomorrow);
 	}
@@ -202,19 +201,19 @@ public class TasksServiceEndpoint {
 	@Path("/search/title/{pattern}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String search(@PathParam(value = "pattern") String pattern) {
-			return FormatUtils.formatSearchResultList(tasks.values(), new Predicate<Task>() {
+			return FormatUtils.formatSearchResultList(tasks.getTasks().values(), new Predicate<Task>() {
 			@Override
 			public boolean test(Task t) {
 				return t.getTitle().toLowerCase().contains(pattern.toLowerCase());
 			}
 		});
 	}
-	
+
 	@GET
 	@Path("/search/notes/{pattern}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String searchInNotes(@PathParam(value = "pattern") String pattern) {
-		return FormatUtils.formatTaskList(tasks.values(), new Predicate<Task>() {
+		return FormatUtils.formatTaskList(tasks.getTasks().values(), new Predicate<Task>() {
 			@Override
 			public boolean test(Task t) {
 				return StringUtils.isStringNull(t.getNotes()).toLowerCase().contains(pattern.toLowerCase());
@@ -249,10 +248,10 @@ public class TasksServiceEndpoint {
 	@Path("/desc/{id}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String fetchTasksDesc(@PathParam(value = "id") String id) throws IOException {
-		if ( tasks.isEmpty() )
+		if ( tasks.getTasks().isEmpty() )
 			refresh();
-		if ( tasks.containsKey(id)) {
-			return FormatUtils.formatTaskWithNotes(tasks.get(id));
+		if ( tasks.getTasks().containsKey(id)) {
+			return FormatUtils.formatTaskWithNotes(tasks.getTasks().get(id));
 		}
 		throw new IllegalArgumentException("No tasks associated to ID: " + id);
 	}
