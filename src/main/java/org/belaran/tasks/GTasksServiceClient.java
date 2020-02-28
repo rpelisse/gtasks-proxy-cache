@@ -16,7 +16,6 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
 
-import org.belaran.tasks.util.TagUtils;
 import org.belaran.tasks.util.TaskUtils;
 
 import com.google.api.client.auth.oauth2.Credential;
@@ -122,7 +121,7 @@ public class GTasksServiceClient {
 	public void tagAndUpdateTask(String symbol, Task task) throws IOException {
 		getService().tasks()
 				.update(MAIN_TASK_LIST_ID, task.getId(),
-						TaskUtils.updateTaskTitle(task, TagUtils.tagTaskTitle(symbol, task.getTitle())))
+						TaskUtils.updateTaskTitle(task, TagController.tagTaskTitle(symbol, task.getTitle())))
 				.execute();
 	}
 

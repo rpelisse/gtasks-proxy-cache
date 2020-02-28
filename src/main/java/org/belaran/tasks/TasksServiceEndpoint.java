@@ -28,7 +28,6 @@ import javax.ws.rs.core.MediaType;
 import org.belaran.tasks.util.DateUtils;
 import org.belaran.tasks.util.FormatUtils;
 import org.belaran.tasks.util.StringUtils;
-import org.belaran.tasks.util.TagUtils;
 import org.belaran.tasks.util.TaskUtils;
 import org.belaran.tasks.util.URLUtils;
 
@@ -43,6 +42,9 @@ public class TasksServiceEndpoint {
 
 	@Inject
 	TasksCache tasks;
+
+	@Inject
+	TagController tagController;
 
 	private final static Logger LOGGER = Logger.getLogger(TasksServiceEndpoint.class.getName());
 
@@ -150,7 +152,7 @@ public class TasksServiceEndpoint {
 	@Path("/tag/{id}/{tag}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public void tagTask(@PathParam(value = "id") String id, @PathParam(value = "tag") String tag) throws IOException, GeneralSecurityException {
-		gtasksClient.tagAndUpdateTask(TagUtils.getSymbolForTag(tag),gtasksClient.retrieveTaskById(id));
+		gtasksClient.tagAndUpdateTask(tagController.getSymbolForTag(tag),gtasksClient.retrieveTaskById(id));
 		asyncRefresh();
 	}
 
@@ -158,7 +160,7 @@ public class TasksServiceEndpoint {
 	@Path("/tag/list")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String supportedTagList() throws IOException, GeneralSecurityException {
-		return TagUtils.TAGS_INDEXED_BY_LETTER_ID.toString();
+		return tagController.getTagsIndexedByName().toString();
 	}
 
 	@POST
