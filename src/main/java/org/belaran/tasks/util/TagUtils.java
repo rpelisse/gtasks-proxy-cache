@@ -18,13 +18,12 @@ public final class TagUtils {
 		TagUtils.TAGS_INDEXED_BY_LETTER_ID.put("house", "🏠");
 		TagUtils.TAGS_INDEXED_BY_LETTER_ID.put("print", "📄");
 		TagUtils.TAGS_INDEXED_BY_LETTER_ID.put("food", "🍆");
-		TagUtils.TAGS_INDEXED_BY_LETTER_ID.put("food", "🍆");
 	}
 
 	private TagUtils() {
-		
+
 	}
-	
+
 	public static String tagTaskTitle(String symbol, String title) {
 		return symbol + " " + title;
 	}

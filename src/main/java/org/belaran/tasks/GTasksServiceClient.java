@@ -125,26 +125,26 @@ public class GTasksServiceClient {
 						TaskUtils.updateTaskTitle(task, TagUtils.tagTaskTitle(symbol, task.getTitle())))
 				.execute();
 	}
-	
+
 	public Task updateTask(Task task) throws IOException {
 		return getService().tasks()
 				.update(MAIN_TASK_LIST_ID, task.getId(), task)
 				.execute();
 	}
-	
+
 	public Task retrieveTaskById(String id) throws IOException {
 		return Optional.of(getService().tasks().get(MAIN_TASK_LIST_ID, id).execute()).orElseThrow(() -> new IllegalArgumentException("No task associated to id " + id));
 	}
-	
+
 	public String insertTask(Task task) throws IOException {
 		return getService().tasks().insert(MAIN_TASK_LIST_ID, task).execute().getId();
 	}
 
 	public void bumpTaskById(String id, int nbDays) throws IOException {
 		Task task = this.retrieveTaskById(id);
-		getService().tasks().update(MAIN_TASK_LIST_ID, task.getId(), TaskUtils.pushDueDateTo(task, nbDays)).execute();		
+		getService().tasks().update(MAIN_TASK_LIST_ID, task.getId(), TaskUtils.pushDueDateTo(task, nbDays)).execute();
 	}
-	
+
 	public void deleteTask(String taskId) {
 		try {
 		getService().tasks().delete(MAIN_TASK_LIST_ID, taskId).execute();
