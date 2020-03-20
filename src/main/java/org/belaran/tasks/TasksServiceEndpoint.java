@@ -170,6 +170,13 @@ public class TasksServiceEndpoint {
 		asyncRefresh();
 	}
 
+	@POST
+	@Path("/refresh/sync")
+	@Produces(MediaType.TEXT_PLAIN)
+	public void httpSyncRefresh() throws IOException, GeneralSecurityException {
+		refresh();
+	}
+
 	@GET
 	@Path("/list/today")
 	@Produces(MediaType.TEXT_PLAIN)
