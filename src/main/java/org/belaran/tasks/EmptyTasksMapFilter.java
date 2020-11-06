@@ -15,17 +15,17 @@ import org.jboss.logging.Logger;
 
 @Provider
 public class EmptyTasksMapFilter implements ContainerRequestFilter {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(EmptyTasksMapFilter.class);
 	private static final int TIMEOUT = 30000000;
 	private static final int WAIT_TIME = 300;
-	
+
 	@Context
 	UriInfo info;
-	
+
 	@Inject
 	TasksCache tasks;
-	
+
 	@Inject
 	GTasksServiceClient client;
 
@@ -43,7 +43,7 @@ public class EmptyTasksMapFilter implements ContainerRequestFilter {
 			}
 		}
 	}
-	
+
 	private void waitForTasksToFillUp() {
 		int timeAwaited = 0;
 		while ( tasks.getTasks().isEmpty() && timeAwaited < TIMEOUT) {
@@ -52,7 +52,7 @@ public class EmptyTasksMapFilter implements ContainerRequestFilter {
 			timeAwaited += WAIT_TIME;
 		}
 	}
-	
+
 	private void waitForInMilliSeconds(int nbMilliSeconds) {
 		CountDownLatch counter = new CountDownLatch(0);
 		try {

@@ -126,7 +126,7 @@ public class GTasksServiceClient {
 	public void resetClient() {
 		taskService = Optional.empty();
 	}
-	
+
 	public void tagAndUpdateTask(String symbol, Task task) throws IOException {
 		getService().tasks()
 				.update(MAIN_TASK_LIST_ID, task.getId(),
