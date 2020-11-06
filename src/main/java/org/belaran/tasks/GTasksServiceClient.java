@@ -47,7 +47,6 @@ public class GTasksServiceClient {
 	private static final String MAIN_TASK_LIST_ID = "@default";
 
 	private FileDataStoreFactory dataStoreFactory;
-	private NetHttpTransport httpTransport;
 
 	private void checkClientSecretFilename() {
 		if (!"".equals(CLIENT_SECRET_FILENAME))
@@ -72,10 +71,7 @@ public class GTasksServiceClient {
 	@PostConstruct
 	void serviceInit() throws IOException, GeneralSecurityException {
 		checkClientSecretFilename();
-
 		dataStoreFactory = new FileDataStoreFactory(DATA_STORE_DIR);
-		httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-
 	}
 
 	public Map<String, Task> fetchAllItemsOfDefaultList() throws IOException {
@@ -106,7 +102,16 @@ public class GTasksServiceClient {
 	private Optional<Tasks> taskService = Optional.empty();
 
 	public Tasks getService() throws IOException {
+		try {
+			return getServiceXXX();
+		} catch ( GeneralSecurityException e) {
+			throw new IOException(e);
+		}
+	}
+
+	private Tasks getServiceXXX() throws IOException, GeneralSecurityException {
 		if (taskService.isEmpty()) {
+			NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 			GoogleClientSecrets clientSecrets = openGoogleClientSecrets();
 			GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY,
 					clientSecrets, SCOPES).setDataStoreFactory(dataStoreFactory).setAccessType("offline").build();
@@ -118,6 +123,10 @@ public class GTasksServiceClient {
 		return taskService.get();
 	}
 
+	public void resetClient() {
+		taskService = Optional.empty();
+	}
+	
 	public void tagAndUpdateTask(String symbol, Task task) throws IOException {
 		getService().tasks()
 				.update(MAIN_TASK_LIST_ID, task.getId(),

@@ -1,5 +1,6 @@
 package org.belaran.tasks;
 
+import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -25,11 +26,21 @@ public class EmptyTasksMapFilter implements ContainerRequestFilter {
 	@Inject
 	TasksCache tasks;
 	
+	@Inject
+	GTasksServiceClient client;
+
 	@Override
-	public void filter(ContainerRequestContext context) {
+	public void filter(ContainerRequestContext context) throws IOException {
 		if ( info.getPath().contains("tasks/list") && tasks.getTasks().isEmpty() ) {
 			if (LOGGER.isDebugEnabled() ) LOGGER.debug("Tasks list is currently, wait for (maximum) " + 3 + " before returning request:");
 			waitForTasksToFillUp();
+			if ( tasks.getTasks().isEmpty() ) {
+				client.resetClient();
+				client.getService();
+				synchronized (tasks) {
+					tasks.getTasks().putAll(client.fetchAllItemsOfDefaultList());
+				}
+			}
 		}
 	}
 	

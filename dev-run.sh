@@ -1,6 +1,6 @@
 #!/bin/bash
 export JAVA_HOME=${JAVA_HOME:-'/usr/lib/jvm/java-11'}
-export MAVEN_HOME=${MAVEN_HOME:-'~/Products/tools/apache-maven-3.6.3'}
+export MAVEN_HOME=${MAVEN_HOME:-'/home/rpelisse/Products/tools/apache-maven-3.6.3'}
 export PATH=${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${PATH}
 
 
