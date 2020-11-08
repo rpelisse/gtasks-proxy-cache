@@ -122,7 +122,7 @@
                       </mapping>
                       <mapping>
                         <directory>/opt/${project.artifactId}/</directory>
-                        <fileMode>0755</fileMode>
+                        <filemode>0755</filemode>
                         <sources>
                           <source>
                             <location>src/main/bash/taskd</location>
@@ -131,7 +131,7 @@
                       </mapping>
                       <mapping>
                         <directory>/opt/${project.artifactId}/</directory>
-                        <fileMode>0755</fileMode>
+                        <filemode>0755</filemode>
                         <sources>
                           <source>
                             <location>src/main/bash/tasks</location>
