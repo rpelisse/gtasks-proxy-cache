@@ -16,7 +16,7 @@ public class TagController {
 		tagsIndexedByName.put("blocker", "⛔");
 		tagsIndexedByName.put("rpg","🎲");
 		tagsIndexedByName.put("email", "✉️");
-		tagsIndexedByName.put("cat", "🐹");
+		tagsIndexedByName.put("cat", "🐈");
 		tagsIndexedByName.put("music", "🎶");
 		tagsIndexedByName.put("house", "🏠");
 		tagsIndexedByName.put("print", "📄");
