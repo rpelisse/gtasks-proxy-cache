@@ -113,14 +113,6 @@
                         </sources>
                       </mapping>
                       <mapping>
-                        <directory>/opt/${project.artifactId}/lib</directory>
-                        <sources>
-                          <source>
-                            <location>target/lib/</location>
-                          </source>
-                        </sources>
-                      </mapping>
-                      <mapping>
                         <directory>/opt/${project.artifactId}/</directory>
                         <filemode>0755</filemode>
                         <sources>
