@@ -11,7 +11,7 @@ public class TagController {
 	private Map<String,String> tagsIndexedByName = new HashMap<String, String>(3);
 
 	public TagController() {
-		tagsIndexedByName.put("phone", "☎️");
+		tagsIndexedByName.put("phone", "📞");
 		tagsIndexedByName.put("dollar", "💲");
 		tagsIndexedByName.put("blocker", "⛔");
 		tagsIndexedByName.put("rpg","🎲");
