@@ -25,4 +25,4 @@ check_cmd 'mvn' "${MAVEN_HOME}"
 
 export TASKSD_PIDFILE=$(pwd)/taskd.pid
 export TASKS_CLIENT_SECRET="$(pwd)/client_secret.json"
-mvn clean -Dquarkus.package.type=uber-jar install
+mvn clean -Dquarkus.package.type=uber-jar package
