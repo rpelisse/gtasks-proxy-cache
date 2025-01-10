@@ -107,7 +107,6 @@ public class TasksServiceEndpoint {
 		return asyncRefresh(insertTaskAsync(TaskUtils.insertURLTask(URLUtils.stringToURL(urlAsString), today())));
 	}
 
-
 	@PUT
 	@Path("/{title}/{description}")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -129,7 +128,6 @@ public class TasksServiceEndpoint {
 		task.setNotes(notes);
 		return asyncRefresh(gtasksClient.updateTask(task).getId());
 	}
-
 
 	@POST
 	@Path("/rename/{id}")
@@ -204,6 +202,19 @@ public class TasksServiceEndpoint {
 		return FormatUtils.formatTaskList(tasks.getTasks().values(),(t -> {
 			return DateUtils.isSameDay(tomorrow, t.getDue());
 		}), tomorrow);
+	}
+
+	@GET
+	@Path("/list/on/{date}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String listOnDay(@PathParam(value = "date") String date) throws IOException, GeneralSecurityException {
+        // 2019-10-12T00:00:00.00Z
+        // 2019-10-12T07:20:50.52Z
+		final DateTime dueDate = DateTime.parseRfc3339(date + "T00:00:00.00Z");
+        LOGGER.info("List tasks on:" + dueDate);
+		return FormatUtils.formatTaskList(tasks.getTasks().values(),(t -> {
+			return DateUtils.isSameDay(dueDate, t.getDue());
+		}), dueDate);
 	}
 
 	@GET

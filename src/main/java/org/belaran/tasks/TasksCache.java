@@ -13,7 +13,7 @@ public class TasksCache {
 	private final Map<String, Task> tasks = new ConcurrentHashMap<String, Task>();
 
 	public TasksCache() {
-		
+
 	}
 
 	public Map<String, Task> getTasks() {

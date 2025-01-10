@@ -3,6 +3,7 @@ package org.belaran.tasks.util;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.logging.Logger;
 
 import com.google.api.client.util.DateTime;
 
@@ -10,7 +11,8 @@ public class DateUtils {
 
 	private static final long ONE_DAY__IN_MILLIS = 86400000;
 	private static SimpleDateFormat SIMPLE_DATE_FORMATTER = new SimpleDateFormat("yyyyMMdd");
-	
+	private final static Logger LOGGER = Logger.getLogger(DateUtils.class.getName());
+
 	public static DateTime today() {
 		return new DateTime(System.currentTimeMillis());
 	}
