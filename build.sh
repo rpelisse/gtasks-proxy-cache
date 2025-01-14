@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euo pipefail
-export JAVA_HOME=${JAVA_HOME:-'/usr/lib/jvm/java-17-openjdk-17.0.9.0.9-3.fc39.x86_64/'}
+export JAVA_HOME=${JAVA_HOME:-'/usr/lib/jvm/jre-17'}
 export MAVEN_HOME=${MAVEN_HOME:-'/opt/java/apache-maven-3.8.6/'}
 export PATH=${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${PATH}
 
