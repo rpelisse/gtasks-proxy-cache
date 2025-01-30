@@ -8,14 +8,14 @@
     <artifactId>gtasks-proxy</artifactId>
     <version>2.18.3</version>
     <properties>
-        <quarkus.version>2.16.12.Final</quarkus.version>
+        <quarkus.version>3.18.1</quarkus.version>
         <!--quarkus.version>3.0.0.Final</quarkus.version-->
         <google.tasks.version>v1-rev58-1.25.0</google.tasks.version>
         <google.api.version>1.25.0</google.api.version>
-        <surefire.version>2.22.0</surefire.version>
+        <surefire.version>3.2.3</surefire.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.9</maven.compiler.source>
-        <maven.compiler.target>1.9</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <dependencyManagement>

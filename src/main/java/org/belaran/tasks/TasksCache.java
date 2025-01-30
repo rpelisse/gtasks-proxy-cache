@@ -3,7 +3,7 @@ package org.belaran.tasks;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 import com.google.api.services.tasks.model.Task;
 
