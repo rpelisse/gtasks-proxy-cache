@@ -36,7 +36,9 @@ public class DateUtils {
 			.withZone(java.time.ZoneId.of("CET"));
 
 	public static String formatDate(DateTime date) {
-		return formatter.format(new Date(date.getValue()).toInstant());
+        if (date != null )
+		    return formatter.format(new Date(date.getValue()).toInstant());
+        return "(no date)";
 	}
 
 	private static int compareDateTo(Date date1, Date date2) {
