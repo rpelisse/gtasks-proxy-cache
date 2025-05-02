@@ -6,7 +6,7 @@
 
     <groupId>org.belaran</groupId>
     <artifactId>gtasks-proxy</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.4</version>
     <properties>
         <quarkus.version>3.22.1</quarkus.version>
         <!--quarkus.version>3.0.0.Final</quarkus.version-->
