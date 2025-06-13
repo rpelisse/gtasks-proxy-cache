@@ -282,4 +282,11 @@ public class TasksServiceEndpoint {
 	public String pid() {
 		return String.valueOf(ProcessHandle.current().pid());
 	}
+
+	@GET
+	@Path("/version")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String version() {
+		return org.belaran.tasks.GtasksVersion.VERSION;
+	}
 }

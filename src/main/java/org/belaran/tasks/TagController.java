@@ -22,6 +22,7 @@ public class TagController {
 		tagsIndexedByName.put("print", "📄");
 		tagsIndexedByName.put("food", "🍆");
         tagsIndexedByName.put("medics","💊");
+        tagsIndexedByName.put("write","✏️");
 	}
 
 	public Map<String, String> getTagsIndexedByName() {
