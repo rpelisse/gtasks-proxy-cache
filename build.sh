@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-export JAVA_HOME=${JAVA_HOME:-'/usr/lib/jvm/jre-17'}
-export MAVEN_HOME=${MAVEN_HOME:-'/opt/java/apache-maven-3.9.10/'}
+export JAVA_HOME=${JAVA_HOME:-'/usr/lib/jvm/java-21'}
+export MAVEN_HOME=${MAVEN_HOME:-'/opt/java/apache-maven-3.9.11/'}
 export PATH=${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${PATH}
 
 check_cmd() {
