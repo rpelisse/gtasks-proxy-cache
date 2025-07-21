@@ -287,6 +287,6 @@ public class TasksServiceEndpoint {
 	@Path("/version")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String version() {
-		return "GTasks Proxy Cache Version: " + org.belaran.tasks.GtasksVersion.VERSION + "(Powered by Quarkus v" + org.belaran.tasks.GtasksVersion.QUARKUS_VERSION + ")";
+		return "GTasks Proxy Cache Version: " + org.belaran.tasks.GtasksVersion.VERSION + " (Powered by Quarkus v" + org.belaran.tasks.GtasksVersion.QUARKUS_VERSION + ")";
 	}
 }
