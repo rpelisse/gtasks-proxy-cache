@@ -8,7 +8,7 @@
     <artifactId>gtasks-proxy</artifactId>
     <version>${gtasks.version}</version>
     <properties>
-        <gtasks.version>3.0.9</gtasks.version>
+        <gtasks.version>3.0.10</gtasks.version>
         <quarkus.version>3.24.5</quarkus.version>
         <google.tasks.version>v1-rev58-1.25.0</google.tasks.version>
         <google.api.version>1.25.0</google.api.version>
