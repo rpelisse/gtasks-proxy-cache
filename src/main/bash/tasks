@@ -44,8 +44,14 @@ task_url='none'
 task_to_perform='none'
 NOTES=''
 TASK_ID=''
-while getopts Vhlrtda:i:n:ip:bos:S:D:T:u:R: OPT; do
+while getopts VhlLrtda:i:n:ip:bos:S:D:T:u:R: OPT; do
   case "$OPT" in
+    L)
+        call_gtasksks_proxy 'tag/list' | sed -e 's/{//g' -e 's/}//g' -e 's/,/\n/g' | sed -e 's/^ *//g'
+        exit 0
+        ;;
+    l)
+
     l)
         call_gtasksks_proxy 'list/today'
         ;;
