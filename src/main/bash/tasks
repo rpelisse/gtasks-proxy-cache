@@ -51,8 +51,6 @@ while getopts VhlLrtda:i:n:ip:bos:S:D:T:u:R: OPT; do
         exit 0
         ;;
     l)
-
-    l)
         call_gtasksks_proxy 'list/today'
         ;;
     t)
