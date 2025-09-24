@@ -10,7 +10,7 @@
     <properties>
         <gtasks.version>3.3.0</gtasks.version>
         <quarkus.version>3.28.0</quarkus.version>
-        <google.tasks.version>v1-rev58-1.25.0</google.tasks.version>
+        <google.tasks.version>v1-rev71-1.25.0</google.tasks.version>
         <google.api.version>1.25.0</google.api.version>
         <surefire.version>3.2.3</surefire.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
