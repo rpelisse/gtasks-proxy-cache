@@ -24,6 +24,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Min;
 
 import org.belaran.tasks.util.DateUtils;
 import org.belaran.tasks.util.FormatUtils;
@@ -95,7 +97,7 @@ public class TasksServiceEndpoint {
 	@PUT
 	@Path("/{title}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String addTasks(@PathParam(value = "title") String title) throws FileNotFoundException, IOException {
+	public String addTasks(@NotBlank @PathParam(value = "title") String title) throws FileNotFoundException, IOException {
 		return insertTaskAsync(TaskUtils.buildTask(title, "", today()));
 	}
 
@@ -103,15 +105,15 @@ public class TasksServiceEndpoint {
 	@Path("/add/from/url/")
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.TEXT_PLAIN)
-	public String addTasksAsUrl(String urlAsString) throws FileNotFoundException, IOException {
+	public String addTasksAsUrl(@NotBlank String urlAsString) throws FileNotFoundException, IOException {
 		return asyncRefresh(insertTaskAsync(TaskUtils.insertURLTask(URLUtils.stringToURL(urlAsString), today())));
 	}
 
 	@PUT
 	@Path("/{title}/{description}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String addTasksWithNotes(@PathParam(value = "title") String title,
-			@PathParam(value = "description") String description) throws FileNotFoundException, IOException {
+	public String addTasksWithNotes(@NotBlank @PathParam(value = "title") String title,
+		                            @NotBlank @PathParam(value = "description") String description) throws FileNotFoundException, IOException {
 		return insertTaskAsync(TaskUtils.buildTask(title, description, today()));
 	}
 
@@ -119,7 +121,7 @@ public class TasksServiceEndpoint {
 	@Path("/notes/{id}")
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.TEXT_PLAIN)
-	public String addNotesToTask(@PathParam(value = "id") String id, String notes) throws FileNotFoundException, IOException {
+	public String addNotesToTask(@NotBlank @PathParam(value = "id") String id, @NotBlank String notes) throws FileNotFoundException, IOException {
 		Task task = gtasksClient.retrieveTaskById(id);
 		if ( task == null )
 			throw new IllegalArgumentException("No tasks associated to id:" + id);
@@ -133,7 +135,7 @@ public class TasksServiceEndpoint {
 	@Path("/rename/{id}")
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.TEXT_PLAIN)
-	public String renameTask(@PathParam(value = "id") String id, String title) throws FileNotFoundException, IOException {
+	public String renameTask(@NotBlank @PathParam(value = "id") String id, @NotBlank String title) throws FileNotFoundException, IOException {
 		Task task = gtasksClient.retrieveTaskById(id);
 		if ( task == null )
 			throw new IllegalArgumentException("No tasks associated to id:" + id);
@@ -149,7 +151,8 @@ public class TasksServiceEndpoint {
 	@POST
 	@Path("/tag/{id}/{tag}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public void tagTask(@PathParam(value = "id") String id, @PathParam(value = "tag") String tag) throws IOException, GeneralSecurityException {
+	public void tagTask(@NotBlank @PathParam(value = "id") String id,
+                        @NotBlank @PathParam(value = "tag") String tag) throws IOException, GeneralSecurityException {
 		gtasksClient.tagAndUpdateTask(tagController.getSymbolForTag(tag),gtasksClient.retrieveTaskById(id));
 		asyncRefresh();
 	}
@@ -207,9 +210,7 @@ public class TasksServiceEndpoint {
 	@GET
 	@Path("/list/on/{date}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String listOnDay(@PathParam(value = "date") String date) throws IOException, GeneralSecurityException {
-        // 2019-10-12T00:00:00.00Z
-        // 2019-10-12T07:20:50.52Z
+	public String listOnDay(@NotBlank @PathParam(value = "date") String date) throws IOException, GeneralSecurityException {
 		final DateTime dueDate = DateTime.parseRfc3339(date + "T00:00:00.00Z");
         LOGGER.info("List tasks on:" + dueDate);
 		return FormatUtils.formatTaskList(tasks.getTasks().values(),(t -> {
@@ -220,7 +221,7 @@ public class TasksServiceEndpoint {
 	@GET
 	@Path("/search/title/{pattern}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String search(@PathParam(value = "pattern") String pattern) {
+	public String search(@NotBlank @PathParam(value = "pattern") String pattern) {
 			return FormatUtils.formatSearchResultList(tasks.getTasks().values(), new Predicate<Task>() {
 			@Override
 			public boolean test(Task t) {
@@ -232,7 +233,7 @@ public class TasksServiceEndpoint {
 	@GET
 	@Path("/search/notes/{pattern}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String searchInNotes(@PathParam(value = "pattern") String pattern) {
+	public String searchInNotes(@NotBlank @PathParam(value = "pattern") String pattern) {
 		return FormatUtils.formatTaskList(tasks.getTasks().values(), new Predicate<Task>() {
 			@Override
 			public boolean test(Task t) {
@@ -244,7 +245,7 @@ public class TasksServiceEndpoint {
 	@DELETE
 	@Path("/delete/{id}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public void deleteTask(@PathParam(value = "id") String taskId) throws IOException {
+	public void deleteTask(@NotBlank @PathParam(value = "id") String taskId) throws IOException {
 		System.out.println("Delete called with :" + taskId);
 		gtasksClient.deleteTask(taskId);
 		asyncRefresh();
@@ -253,21 +254,21 @@ public class TasksServiceEndpoint {
 	@POST
 	@Path("/bump/{id}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public void bump(@PathParam(value = "id") String id) throws IOException {
+	public void bump(@NotBlank @PathParam(value = "id") String id) throws IOException {
 		asyncBump(id, 1);
 	}
 
 	@POST
 	@Path("/bump/to/{id}/{nbDays}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public void bumpTo(@PathParam(value = "id") String id, @PathParam(value = "nbDays") int nbDays) throws IOException {
+	public void bumpTo(@NotBlank @PathParam(value = "id") String id, @Min(0) @PathParam(value = "nbDays") int nbDays) throws IOException {
 		asyncBump(id, nbDays);
 	}
 
 	@GET
 	@Path("/desc/{id}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public String fetchTasksDesc(@PathParam(value = "id") String id) throws IOException {
+	public String fetchTasksDesc(@NotBlank @PathParam(value = "id") String id) throws IOException {
 		if ( tasks.getTasks().isEmpty() )
 			refresh();
 		if ( tasks.getTasks().containsKey(id)) {

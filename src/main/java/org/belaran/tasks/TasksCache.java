@@ -19,5 +19,4 @@ public class TasksCache {
 	public Map<String, Task> getTasks() {
 		return tasks;
 	}
-
 }
