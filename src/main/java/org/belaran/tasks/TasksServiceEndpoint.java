@@ -261,7 +261,7 @@ public class TasksServiceEndpoint {
 	@POST
 	@Path("/bump/to/{id}/{nbDays}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public void bumpTo(@NotBlank @PathParam(value = "id") String id, @Min(0) @PathParam(value = "nbDays") int nbDays) throws IOException {
+	public void bumpTo(@NotBlank @PathParam(value = "id") String id, @PathParam(value = "nbDays") int nbDays) throws IOException {
 		asyncBump(id, nbDays);
 	}
 
