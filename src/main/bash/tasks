@@ -15,7 +15,7 @@ encode_chars_for_url() {
 }
 
 
-call_gtasksks_proxy() {
+call_gtasks_proxy() {
   local path=${1}
   local method=${2:-'GET'}
   local data=${3:-''}
@@ -47,20 +47,20 @@ TASK_ID=''
 while getopts VhlLrtda:i:n:ip:bos:S:D:T:u:R: OPT; do
   case "$OPT" in
     L)
-        call_gtasksks_proxy 'tag/list' | sed -e 's/{//g' -e 's/}//g' -e 's/,/\n/g' | sed -e 's/^ *//g'
+        call_gtasks_proxy 'tag/list' | sed -e 's/{//g' -e 's/}//g' -e 's/,/\n/g' | sed -e 's/^ *//g'
         exit 0
         ;;
     l)
-        call_gtasksks_proxy 'list/today'
+        call_gtasks_proxy 'list/today'
         ;;
     t)
-        call_gtasksks_proxy 'list/tomorrow'
+        call_gtasks_proxy 'list/tomorrow'
 		;;
     o)
-        call_gtasksks_proxy 'list/overdue'
+        call_gtasks_proxy 'list/overdue'
         ;;
     r)
-        call_gtasksks_proxy 'refresh' 'POST'
+        call_gtasks_proxy 'refresh' 'POST'
         ;;
     i)
         TASK_ID="${OPTARG}"
@@ -82,17 +82,17 @@ while getopts VhlLrtda:i:n:ip:bos:S:D:T:u:R: OPT; do
         task_to_perform='bump'
         ;;
     s)
-        call_gtasksks_proxy "search/title/$(encode_chars_for_url ${OPTARG})"
+        call_gtasks_proxy "search/title/$(encode_chars_for_url ${OPTARG})"
         ;;
     S)
-        call_gtasksks_proxy "search/notes/$(encode_chars_for_url ${OPTARG})"
+        call_gtasks_proxy "search/notes/$(encode_chars_for_url ${OPTARG})"
         ;;
     D)
-        call_gtasksks_proxy "desc/$(encode_chars_for_url ${OPTARG})"
+        call_gtasks_proxy "desc/$(encode_chars_for_url ${OPTARG})"
         echo ''
         ;;
     V)
-        call_gtasksks_proxy "version"
+        call_gtasks_proxy "version"
         echo ''
         exit 0
         ;;
@@ -119,20 +119,20 @@ while getopts VhlLrtda:i:n:ip:bos:S:D:T:u:R: OPT; do
 done
 
 if [ "${task_url}" != 'none' ]; then
-  call_gtasksks_proxy "add/from/url" 'PUT' "${task_url}"
+  call_gtasks_proxy "add/from/url" 'PUT' "${task_url}"
 fi
 
 readonly NOTES=${NOTES:-""}
 if [ -n "${TASK_ID}" -a -n "${NOTES}" ] ; then
-  call_gtasksks_proxy "/notes/${TASK_ID}" 'POST' "${NOTES}"
+  call_gtasks_proxy "/notes/${TASK_ID}" 'POST' "${NOTES}"
 fi
 
 if [ "${task_to_perform}" = 'rename' ]; then
-  call_gtasksks_proxy "rename/${TASK_ID}" 'POST' "${new_name}"
+  call_gtasks_proxy "rename/${TASK_ID}" 'POST' "${new_name}"
 fi
 
 if [ "${task_to_perform}" = 'add-task' ]; then
-    call_gtasksks_proxy $(encode_chars_for_url "${TASK_TITLE}")/$(encode_chars_for_url "${NOTES}") 'PUT'
+    call_gtasks_proxy $(encode_chars_for_url "${TASK_TITLE}")/$(encode_chars_for_url "${NOTES}") 'PUT'
 fi
 
 # the next tasks requires to have a task id set
@@ -145,13 +145,13 @@ fi
 readonly POSTPONE_TO="${POSTPONE_TO:-1}"
 
 if [ "${task_to_perform}" = 'bump' ]; then
-  call_gtasksks_proxy "bump/to/${TASK_ID}/${POSTPONE_TO}" 'POST'
+  call_gtasks_proxy "bump/to/${TASK_ID}/${POSTPONE_TO}" 'POST'
 fi
 
 if [ "${task_to_perform}" = 'delete' ]; then
-  call_gtasksks_proxy "delete/${TASK_ID}" 'DELETE'
+  call_gtasks_proxy "delete/${TASK_ID}" 'DELETE'
 fi
 
 if [ "${task_to_perform}" = 'tag' ]; then
-  call_gtasksks_proxy "tag/${TASK_ID}/${tag_id}" 'POST'
+  call_gtasks_proxy "tag/${TASK_ID}/${tag_id}" 'POST'
 fi
