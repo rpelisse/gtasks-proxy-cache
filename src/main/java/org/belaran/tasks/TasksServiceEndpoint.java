@@ -245,10 +245,12 @@ public class TasksServiceEndpoint {
 	@DELETE
 	@Path("/delete/{id}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public void deleteTask(@NotBlank @PathParam(value = "id") String taskId) throws IOException {
+	public String deleteTask(@NotBlank @PathParam(value = "id") String taskId) throws IOException {
 		System.out.println("Delete called with :" + taskId);
-		gtasksClient.deleteTask(taskId);
+        String returnMessage = FormatUtils.formatReturnMessage(gtasksClient.retrieveTaskById(taskId), "deleted");
+        gtasksClient.deleteTask(taskId);
 		asyncRefresh();
+        return returnMessage;
 	}
 
 	@POST
@@ -261,8 +263,9 @@ public class TasksServiceEndpoint {
 	@POST
 	@Path("/bump/to/{id}/{nbDays}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public void bumpTo(@NotBlank @PathParam(value = "id") String id, @PathParam(value = "nbDays") int nbDays) throws IOException {
-		asyncBump(id, nbDays);
+	public String bumpTo(@NotBlank @PathParam(value = "id") String id, @PathParam(value = "nbDays") int nbDays) throws IOException {
+        asyncBump(id, nbDays);
+        return FormatUtils.formatReturnMessage(gtasksClient.retrieveTaskById(id), "bumped by " + nbDays + " days");
 	}
 
 	@GET

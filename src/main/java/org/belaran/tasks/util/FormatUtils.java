@@ -81,4 +81,8 @@ public final class FormatUtils {
 	public static String appendNotes(String currentNotes, String notesToAppend) {
 		return currentNotes + EOL + notesToAppend;
 	}
+
+    public static String formatReturnMessage(Task task, String message) {
+        return "Task (" + task.getId() + "): '" + task.getTitle() + "' has been " + message;
+    }
 }
