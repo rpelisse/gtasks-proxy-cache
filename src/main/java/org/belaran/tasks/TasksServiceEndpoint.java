@@ -151,10 +151,15 @@ public class TasksServiceEndpoint {
 	@POST
 	@Path("/tag/{id}/{tag}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public void tagTask(@NotBlank @PathParam(value = "id") String id,
+	public String tagTask(@NotBlank @PathParam(value = "id") String id,
                         @NotBlank @PathParam(value = "tag") String tag) throws IOException, GeneralSecurityException {
-		gtasksClient.tagAndUpdateTask(tagController.getSymbolForTag(tag),gtasksClient.retrieveTaskById(id));
-		asyncRefresh();
+		return tagTaskAndBuildInfoMessage(tagController.getSymbolForTag(tag),gtasksClient.retrieveTaskById(id));
+	}
+
+	private String tagTaskAndBuildInfoMessage(String tag, Task task) throws IOException, GeneralSecurityException {
+            gtasksClient.tagAndUpdateTask(tag, task);
+            asyncRefresh();
+	    return "Tagged task '" + task.getId() + "' - '" + task.getTitle() + "'.";
 	}
 
 	@GET
