@@ -55,7 +55,7 @@ while getopts VhlLrtda:i:n:ip:bos:S:D:T:u:R: OPT; do
         ;;
     t)
         call_gtasks_proxy 'list/tomorrow'
-		;;
+	;;
     o)
         call_gtasks_proxy 'list/overdue'
         ;;
