@@ -122,7 +122,7 @@ public class TasksServiceEndpoint {
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.TEXT_PLAIN)
 	public String addNotesToTask(@NotBlank @PathParam(value = "id") String id, @NotBlank String notes) throws FileNotFoundException, IOException {
-		Task task = gtasksClient.retrieveTaskById(id);
+		var task = gtasksClient.retrieveTaskById(id);
 		if ( task == null )
 			throw new IllegalArgumentException("No tasks associated to id:" + id);
 		if (task.getNotes() == null || ! task.getNotes().isBlank() )
@@ -136,7 +136,7 @@ public class TasksServiceEndpoint {
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.TEXT_PLAIN)
 	public String renameTask(@NotBlank @PathParam(value = "id") String id, @NotBlank String title) throws FileNotFoundException, IOException {
-		Task task = gtasksClient.retrieveTaskById(id);
+		var task = gtasksClient.retrieveTaskById(id);
 		if ( task == null )
 			throw new IllegalArgumentException("No tasks associated to id:" + id);
 		task.setTitle(title);
@@ -187,7 +187,7 @@ public class TasksServiceEndpoint {
 	@Path("/list/today")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String todayList() throws IOException, GeneralSecurityException {
-		final DateTime today = today();
+		final var today = today();
 		return FormatUtils.formatTaskList(tasks.getTasks().values(), (t -> {
 			return DateUtils.isSameDay(today, t.getDue());
 		}), today);
@@ -206,7 +206,7 @@ public class TasksServiceEndpoint {
 	@Path("/list/tomorrow")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String list() throws IOException, GeneralSecurityException {
-		final DateTime tomorrow = tomorrow();
+		final var tomorrow = tomorrow();
 		return FormatUtils.formatTaskList(tasks.getTasks().values(),(t -> {
 			return DateUtils.isSameDay(tomorrow, t.getDue());
 		}), tomorrow);
@@ -216,7 +216,7 @@ public class TasksServiceEndpoint {
 	@Path("/list/on/{date}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String listOnDay(@NotBlank @PathParam(value = "date") String date) throws IOException, GeneralSecurityException {
-		final DateTime dueDate = DateTime.parseRfc3339(date + "T00:00:00.00Z");
+		final var dueDate = DateTime.parseRfc3339(date + "T00:00:00.00Z");
                 LOGGER.info("List tasks on:" + dueDate);
 		return FormatUtils.formatTaskList(tasks.getTasks().values(),(t -> {
 			return DateUtils.isSameDay(dueDate, t.getDue());
@@ -252,7 +252,7 @@ public class TasksServiceEndpoint {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String deleteTask(@NotBlank @PathParam(value = "id") String taskId) throws IOException {
 		LOGGER.info("Delete called with :" + taskId);
-                String returnMessage = FormatUtils.formatReturnMessage(gtasksClient.retrieveTaskById(taskId), "deleted");
+                var returnMessage = FormatUtils.formatReturnMessage(gtasksClient.retrieveTaskById(taskId), "deleted");
                 gtasksClient.deleteTask(taskId);
 		asyncRefresh();
                 return returnMessage;
