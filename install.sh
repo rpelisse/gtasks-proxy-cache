@@ -1,15 +1,15 @@
 #!/bin/bash
 set -euo pipefail
 
-readonly HOMEMASTER_HOME="${HOME}/homemaster.git/"
-readonly HOMEMASTER_ARTEFACTS_DIR="${HOMEMASTER_HOME}/artefacts/"
-readonly RPM_DIR='target/rpm/gtasks-proxy/RPMS/noarch/'
 readonly TASKS_HOME='/opt/gtasks-proxy/'
+readonly SYSTEMD_HOME='/etc/systemd/system/'
 
-sudo dnf install -y "${RPM_DIR}"/gtasks-proxy-*.noarch.rpm
-rm -f "${HOMEMASTER_ARTEFACTS_DIR}/"gtasks-proxy-*noarch.rpm
-cp "${RPM_DIR}/"gtasks-proxy-*.noarch.rpm "${HOMEMASTER_ARTEFACTS_DIR}"
-sudo dos2unix ${TASKS_HOME}/task*
+sudo mkdir -p "${TASKS_HOME}"
+sudo rsync -Arz target/quarkus-app/* "${TASKS_HOME}"
+sudo cp src/main/bash/task* "${TASKS_HOME}"
+sudo cp src/main/systemd/taskd.service "${SYSTEMD_HOME}"
+sudo cp src/main/systemd/taskd.conf /etc/
+sudo systemctl daemon-reload
 echo "Restart taskd"
 sudo systemctl restart taskd
 echo -n "Give a chance to taskd to start..."

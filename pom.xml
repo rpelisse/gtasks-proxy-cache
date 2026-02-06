@@ -102,6 +102,7 @@
           <groupId>io.quarkus</groupId>
           <artifactId>quarkus-maven-plugin</artifactId>
           <version>${quarkus.version}</version>
+          <extensions>true</extensions>
           <executions>
             <execution>
               <goals>
@@ -109,67 +110,6 @@
               </goals>
             </execution>
           </executions>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>rpm-maven-plugin</artifactId>
-          <version>2.1.5</version>
-          <executions>
-              <execution>
-                  <id>generate-rpm</id>
-                  <goals>
-                      <goal>rpm</goal>
-                  </goals>
-              </execution>
-          </executions>
-          <configuration>
-            <group>Homescripts</group>
-            <packager>Romain Pelisse</packager>
-            <mappings>
-              <mapping>
-                <directory>/opt/${project.artifactId}/</directory>
-                <sources>
-                  <source>
-                    <location>target/${project.artifactId}-${project.version}-runner.jar</location>
-                  </source>
-                </sources>
-              </mapping>
-              <mapping>
-                <directory>/opt/${project.artifactId}/</directory>
-                <filemode>0755</filemode>
-                <sources>
-                  <source>
-                    <location>src/main/bash/taskd</location>
-                  </source>
-                </sources>
-              </mapping>
-              <mapping>
-                <directory>/opt/${project.artifactId}/</directory>
-                <filemode>0755</filemode>
-                <sources>
-                  <source>
-                    <location>src/main/bash/tasks</location>
-                  </source>
-                </sources>
-              </mapping>
-              <mapping>
-                <directory>/etc/systemd/system/</directory>
-                <sources>
-                  <source>
-                      <location>src/main/systemd/taskd.service</location>
-                  </source>
-                </sources>
-              </mapping>
-              <mapping>
-                <directory>/etc/</directory>
-                <sources>
-                  <source>
-                      <location>src/main/systemd/taskd.conf</location>
-                  </source>
-                </sources>
-              </mapping>
-            </mappings>
-          </configuration>
         </plugin>
       </plugins>
     </build>
