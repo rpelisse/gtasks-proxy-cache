@@ -62,7 +62,6 @@ public class GTasksServiceClient {
 		try {
 			return GoogleClientSecrets.load(JSON_FACTORY,
 					new InputStreamReader(new FileInputStream(CLIENT_SECRET_FILENAME)));
-
 		} catch (FileNotFoundException fileNotFoundException) {
 			throw new IllegalStateException(fileNotFoundException);
 		}
@@ -111,11 +110,11 @@ public class GTasksServiceClient {
 
 	private Tasks getServiceXXX() throws IOException, GeneralSecurityException {
 		if (taskService.isEmpty()) {
-			NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-			GoogleClientSecrets clientSecrets = openGoogleClientSecrets();
-			GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY,
+			var httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+			var clientSecrets = openGoogleClientSecrets();
+			var flow = new GoogleAuthorizationCodeFlow.Builder(httpTransport, JSON_FACTORY,
 					clientSecrets, SCOPES).setDataStoreFactory(dataStoreFactory).setAccessType("offline").build();
-			Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
+			var credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver())
 					.authorize("user");
 			taskService = Optional.of(new Tasks.Builder(httpTransport, JSON_FACTORY, credential)
 					.setApplicationName(APPLICATION_NAME).build());
@@ -149,16 +148,15 @@ public class GTasksServiceClient {
 	}
 
 	public void bumpTaskById(String id, int nbDays) throws IOException {
-		Task task = this.retrieveTaskById(id);
+		var task = this.retrieveTaskById(id);
 		getService().tasks().update(MAIN_TASK_LIST_ID, task.getId(), TaskUtils.pushDueDateTo(task, nbDays)).execute();
 	}
 
 	public void deleteTask(String taskId) {
 		try {
-		getService().tasks().delete(MAIN_TASK_LIST_ID, taskId).execute();
+		        getService().tasks().delete(MAIN_TASK_LIST_ID, taskId).execute();
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
-
 }

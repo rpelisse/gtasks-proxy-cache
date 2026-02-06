@@ -45,7 +45,7 @@ public class EmptyTasksMapFilter implements ContainerRequestFilter {
 	}
 
 	private void waitForTasksToFillUp() {
-		int timeAwaited = 0;
+		var timeAwaited = 0;
 		while ( tasks.getTasks().isEmpty() && timeAwaited < TIMEOUT) {
 			if (LOGGER.isDebugEnabled() ) LOGGER.debug("Time awaited:" + timeAwaited);
 			waitForInMilliSeconds(WAIT_TIME);
@@ -54,7 +54,7 @@ public class EmptyTasksMapFilter implements ContainerRequestFilter {
 	}
 
 	private void waitForInMilliSeconds(int nbMilliSeconds) {
-		CountDownLatch counter = new CountDownLatch(0);
+		var counter = new CountDownLatch(0);
 		try {
 			counter.await(nbMilliSeconds, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {

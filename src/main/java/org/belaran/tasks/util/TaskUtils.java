@@ -16,7 +16,7 @@ public final class TaskUtils {
 	}
 	
 	public static Task insertURLTask(String taskURL, DateTime date) throws FileNotFoundException, IOException {
-		String title = Jsoup.connect(taskURL).get().title();
+		var title = Jsoup.connect(taskURL).get().title();
 		if ( title.startsWith("Login server redirect"))
 			throw new IOException("Can't add URL due to authentification");
 		return buildTask(title, taskURL, date);
@@ -37,7 +37,7 @@ public final class TaskUtils {
 
 	
 	public static Task buildTask(String title, String description, DateTime dueDate) {
-		Task task = new com.google.api.services.tasks.model.Task();
+		var task = new com.google.api.services.tasks.model.Task();
 		task.setTitle(title);
 		task.setNotes(description);
 		task.setDue(dueDate);
@@ -49,6 +49,4 @@ public final class TaskUtils {
 		task.setDue(new DateTime(task.getDue().getValue() + (nbDays * NB_SECONDS_BY_DAY)));
 		return task;
 	}
-
-
 }
