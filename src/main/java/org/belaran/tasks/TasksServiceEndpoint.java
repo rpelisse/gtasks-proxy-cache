@@ -217,7 +217,7 @@ public class TasksServiceEndpoint {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String listOnDay(@NotBlank @PathParam(value = "date") String date) throws IOException, GeneralSecurityException {
 		final DateTime dueDate = DateTime.parseRfc3339(date + "T00:00:00.00Z");
-        LOGGER.info("List tasks on:" + dueDate);
+                LOGGER.info("List tasks on:" + dueDate);
 		return FormatUtils.formatTaskList(tasks.getTasks().values(),(t -> {
 			return DateUtils.isSameDay(dueDate, t.getDue());
 		}), dueDate);
@@ -251,11 +251,11 @@ public class TasksServiceEndpoint {
 	@Path("/delete/{id}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String deleteTask(@NotBlank @PathParam(value = "id") String taskId) throws IOException {
-		System.out.println("Delete called with :" + taskId);
-        String returnMessage = FormatUtils.formatReturnMessage(gtasksClient.retrieveTaskById(taskId), "deleted");
-        gtasksClient.deleteTask(taskId);
+		LOGGER.info("Delete called with :" + taskId);
+                String returnMessage = FormatUtils.formatReturnMessage(gtasksClient.retrieveTaskById(taskId), "deleted");
+                gtasksClient.deleteTask(taskId);
 		asyncRefresh();
-        return returnMessage;
+                return returnMessage;
 	}
 
 	@POST
@@ -269,13 +269,13 @@ public class TasksServiceEndpoint {
 	@Path("/bump/to/{id}/{nbDays}")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String bumpTo(@NotBlank @PathParam(value = "id") String id, @PathParam(value = "nbDays") int nbDays) throws IOException {
-        asyncBump(id, nbDays);
-        return FormatUtils.formatReturnMessage(gtasksClient.retrieveTaskById(id), "bumped by " + accord(nbDays));
+                asyncBump(id, nbDays);
+                return FormatUtils.formatReturnMessage(gtasksClient.retrieveTaskById(id), "bumped by " + accord(nbDays));
 	}
 
-    private String accord(int nbDays) {
-        return ( nbDays == 1 ) ? nbDays + " day" : nbDays + " days";
-    }
+        private String accord(int nbDays) {
+                return ( nbDays == 1 ) ? nbDays + " day" : nbDays + " days";
+        }
 
 	@GET
 	@Path("/desc/{id}")
