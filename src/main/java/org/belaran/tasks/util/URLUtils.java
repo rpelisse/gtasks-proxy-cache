@@ -1,22 +1,21 @@
 package org.belaran.tasks.util;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public final class URLUtils {
 
 	private URLUtils() {}
 	
-	public static String getLastSegmentOfURLPath(URL url) {
-		return url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
+	public static String getLastSegmentOfURLPath(URI uri) {
+                return uri.getPath().substring(uri.getPath().lastIndexOf('/') + 1);
 	}
 	
-	public static URL stringToURL(String urlAsString) {
+	public static URI stringToURI(String uriAsString) {
 		try {
-			return new URL(urlAsString);
-		} catch ( MalformedURLException e ) {
-			throw new IllegalArgumentException("Invalid URL:" + urlAsString);
+			return new URI(uriAsString);
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException("Invalid URI: " + uriAsString, e);
 		}
 	}
-
 }

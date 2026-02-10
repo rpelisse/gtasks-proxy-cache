@@ -106,7 +106,7 @@ public class TasksServiceEndpoint {
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.TEXT_PLAIN)
 	public String addTasksAsUrl(@NotBlank String urlAsString) throws FileNotFoundException, IOException {
-		return asyncRefresh(insertTaskAsync(TaskUtils.insertURLTask(URLUtils.stringToURL(urlAsString), today())));
+		return asyncRefresh(insertTaskAsync(TaskUtils.insertURLTask(URLUtils.stringToURI(urlAsString), today())));
 	}
 
 	@PUT

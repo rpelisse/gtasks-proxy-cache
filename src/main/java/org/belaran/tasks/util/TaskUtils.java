@@ -2,7 +2,7 @@ package org.belaran.tasks.util;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 
 import org.jsoup.Jsoup;
 
@@ -22,7 +22,7 @@ public final class TaskUtils {
 		return buildTask(title, taskURL, date);
 	}
 
-	public static Task insertURLTask(URL taskURL, DateTime date) throws FileNotFoundException, IOException {
+	public static Task insertURLTask(URI taskURL, DateTime date) throws FileNotFoundException, IOException {
 		try {
 			return insertURLTask(taskURL.toString(), date);
 		} catch ( IOException e ) {
