@@ -24,6 +24,7 @@ public class TagController {
         tagsIndexedByName.put("medics","💊");
         tagsIndexedByName.put("write","✏️");
         tagsIndexedByName.put("drums","🥁");
+        tagsIndexedByName.put("clock","⌚");
     }
 
     public Map<String, String> getTagsIndexedByName() {
