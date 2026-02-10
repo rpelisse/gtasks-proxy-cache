@@ -7,4 +7,4 @@ readonly TASKS_LOGFILE=${TASKS_LOGFILE:-'/var/log/tasks.log'}
 readonly TASKSD_PIDFILE=${TASKSD_PIDFILE:-'/var/run/taskd.pid'}
 
 export TASKS_CLIENT_SECRET=${TASKS_CLIENT_SECRET:-"${TASKS_HOME}/client_secret.json"}
-java -jar ${TASKS_HOME}/quarkus-run.jar > "${TASKS_LOGFILE}"
+java -jar ${TASKS_HOME}/gtasks-proxy-*-runner.jar > "${TASKS_LOGFILE}"

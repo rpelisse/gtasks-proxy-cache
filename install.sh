@@ -5,7 +5,7 @@ readonly TASKS_HOME='/opt/gtasks-proxy/'
 readonly SYSTEMD_HOME='/etc/systemd/system/'
 
 sudo mkdir -p "${TASKS_HOME}"
-sudo rsync -Arz target/quarkus-app/* "${TASKS_HOME}"
+sudo rsync -Arz target/gtasks-proxy-*-runner.jar "${TASKS_HOME}"
 sudo cp src/main/bash/task* "${TASKS_HOME}"
 sudo cp src/main/systemd/taskd.service "${SYSTEMD_HOME}"
 sudo cp src/main/systemd/taskd.conf /etc/
