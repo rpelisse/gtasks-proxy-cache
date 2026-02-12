@@ -39,6 +39,15 @@ call_gtasks_proxy() {
   fi
 }
 
+check_taskd_reachability() {
+  if ! curl -f -s -o /dev/null "${GTASK_PROXY_URL}"; then
+    echo "Error: Unable to access ${GTASK_PROXY_URL}" >&2
+    exit 1
+  fi
+}
+
+check_taskd_reachability
+
 new_name=''
 task_url='none'
 task_to_perform='none'
