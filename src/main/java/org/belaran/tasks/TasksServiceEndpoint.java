@@ -270,7 +270,8 @@ public class TasksServiceEndpoint {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String bumpTo(@NotBlank @PathParam(value = "id") String id, @PathParam(value = "nbDays") int nbDays) throws IOException {
                 asyncBump(id, nbDays);
-                return FormatUtils.formatReturnMessage(gtasksClient.retrieveTaskById(id), "bumped by " + accord(nbDays));
+                var task = gtasksClient.retrieveTaskById(id);
+                return FormatUtils.formatReturnMessage(task, "bumped by " + accord(nbDays) + " to " + DateUtils.formatDate(task.getDue()));
 	}
 
         private String accord(int nbDays) {
