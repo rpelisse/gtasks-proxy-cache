@@ -10,11 +10,11 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.model.Task;
 
 public final class TaskUtils {
-	
+
 	private TaskUtils() {
-		
+
 	}
-	
+
 	public static Task insertURLTask(String taskURL, DateTime date) throws FileNotFoundException, IOException {
 		var title = Jsoup.connect(taskURL).get().title();
 		if ( title.startsWith("Login server redirect"))
@@ -47,7 +47,7 @@ public final class TaskUtils {
 		task.setDue(dueDate);
 		return task;
 	}
-	
+
 	public static Task pushDueDateTo(Task task, int nbDays) {
 		long NB_SECONDS_BY_DAY = 86400L * 1000;
 		task.setDue(new DateTime(task.getDue().getValue() + (nbDays * NB_SECONDS_BY_DAY)));
