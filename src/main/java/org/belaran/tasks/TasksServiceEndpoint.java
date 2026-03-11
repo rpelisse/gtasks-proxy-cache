@@ -153,7 +153,7 @@ public class TasksServiceEndpoint {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String tagTask(@NotBlank @PathParam(value = "id") String id,
                         @NotBlank @PathParam(value = "tag") String tag) throws IOException, GeneralSecurityException {
-		return tagTaskAndBuildInfoMessage(tagController.getSymbolForTag(tag),gtasksClient.retrieveTaskById(id));
+		return tagTaskAndBuildInfoMessage(gtasksClient.tagAndUpdateTask(tagController.getSymbolForTag(tag), gtasksClient.retrieveTaskById(id)));
 	}
 
 	private String tagTaskAndBuildInfoMessage(String tag, Task task) throws IOException, GeneralSecurityException {

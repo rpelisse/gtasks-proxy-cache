@@ -126,11 +126,12 @@ public class GTasksServiceClient {
 		taskService = Optional.empty();
 	}
 
-	public void tagAndUpdateTask(String symbol, Task task) throws IOException {
+	public Task tagAndUpdateTask(String symbol, Task task) throws IOException {
 		getService().tasks()
 				.update(MAIN_TASK_LIST_ID, task.getId(),
 						TaskUtils.updateTaskTitle(task, TagController.tagTaskTitle(symbol, task.getTitle())))
 				.execute();
+        return task;
 	}
 
 	public Task updateTask(Task task) throws IOException {
