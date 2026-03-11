@@ -153,11 +153,19 @@ public class TasksServiceEndpoint {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String tagTask(@NotBlank @PathParam(value = "id") String id,
                         @NotBlank @PathParam(value = "tag") String tag) throws IOException, GeneralSecurityException {
-		return tagTaskAndBuildInfoMessage(gtasksClient.tagAndUpdateTask(tagController.getSymbolForTag(tag), gtasksClient.retrieveTaskById(id)));
+		return refreshAndReturnInfoMessage(gtasksClient.tagAndUpdateTask(tagController.getSymbolForTag(tag), gtasksClient.retrieveTaskById(id)));
 	}
 
-	private String tagTaskAndBuildInfoMessage(String tag, Task task) throws IOException, GeneralSecurityException {
-            gtasksClient.tagAndUpdateTask(tag, task);
+
+	@DELETE
+	@Path("/tag/{id}/{tag}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String removeTagFromTask(@NotBlank @PathParam(value = "id") String id,
+                        @NotBlank @PathParam(value = "tag") String tag) throws IOException, GeneralSecurityException {
+		return refreshAndReturnInfoMessage(gtasksClient.removeTagAndUpdateTask(tagController.getSymbolForTag(tag), gtasksClient.retrieveTaskById(id)));
+	}
+
+	private String refreshAndReturnInfoMessage(Task task) throws IOException, GeneralSecurityException {
             asyncRefresh();
 	    return "Tagged task '" + task.getId() + "' - '" + task.getTitle() + "'.";
 	}

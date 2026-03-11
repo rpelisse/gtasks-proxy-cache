@@ -134,6 +134,14 @@ public class GTasksServiceClient {
         return task;
 	}
 
+	public Task removeTagAndUpdateTask(String symbol, Task task) throws IOException {
+		getService().tasks()
+				.update(MAIN_TASK_LIST_ID, task.getId(),
+						TaskUtils.removeTagFromTaskTitle(task, TagController.tagTaskTitle(symbol, task.getTitle())))
+				.execute();
+        return task;
+    }
+
 	public Task updateTask(Task task) throws IOException {
 		return getService().tasks()
 				.update(MAIN_TASK_LIST_ID, task.getId(), task)

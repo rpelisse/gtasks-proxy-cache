@@ -35,7 +35,11 @@ public final class TaskUtils {
 		return task;
 	}
 
-	
+    public static Task removeTagFromTaskTitle(Task task, String tag) {
+        task.getTitle().replace(tag, "");
+        return task;
+    }
+
 	public static Task buildTask(String title, String description, DateTime dueDate) {
 		var task = new com.google.api.services.tasks.model.Task();
 		task.setTitle(title);
