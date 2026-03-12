@@ -36,7 +36,7 @@ public final class TaskUtils {
 	}
 
     public static Task removeTagFromTaskTitle(Task task, String tag) {
-        task.getTitle().replace(tag, "");
+        task.setTitle(task.getTitle().replaceAll(tag + " *", ""));
         return task;
     }
 

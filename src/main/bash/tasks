@@ -53,7 +53,7 @@ task_url='none'
 task_to_perform='none'
 NOTES=''
 TASK_ID=''
-while getopts VhlLrtda:i:n:ip:bos:S:D:T:u:R: OPT; do
+while getopts VhlLrtda:i:n:ip:bos:S:D:T:u:U:R: OPT; do
   case "$OPT" in
     L)
         call_gtasks_proxy 'tag/list' | sed -e 's/{//g' -e 's/}//g' -e 's/,/\n/g' | sed -e 's/^ *//g'
@@ -64,7 +64,7 @@ while getopts VhlLrtda:i:n:ip:bos:S:D:T:u:R: OPT; do
         ;;
     t)
         call_gtasks_proxy 'list/tomorrow'
-	;;
+	    ;;
     o)
         call_gtasks_proxy 'list/overdue'
         ;;
@@ -116,6 +116,14 @@ while getopts VhlLrtda:i:n:ip:bos:S:D:T:u:R: OPT; do
     u)
         task_url=${OPTARG}
         ;;
+    U)
+        task_to_perform='untag'
+        tag_id="${OPTARG}"
+        if [ -z "${tag_id}" ]; then
+          echo "Missing tag id! Aborting."
+          exit 5
+        fi
+        ;;
     R)
         task_to_perform='rename'
         new_name=${OPTARG}
@@ -163,4 +171,8 @@ fi
 
 if [ "${task_to_perform}" = 'tag' ]; then
   call_gtasks_proxy "tag/${TASK_ID}/${tag_id}" 'POST'
+fi
+
+if [ "${task_to_perform}" = 'untag' ]; then
+  call_gtasks_proxy "tag/${TASK_ID}/${tag_id}" 'DELETE'
 fi
