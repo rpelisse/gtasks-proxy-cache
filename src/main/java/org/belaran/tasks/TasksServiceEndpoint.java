@@ -174,7 +174,7 @@ public class TasksServiceEndpoint {
 	@Path("/tag/list")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String supportedTagList() throws IOException, GeneralSecurityException {
-		return tagController.getTagsIndexedByName().toString();
+		return tagController.returnAllTagsIndexedByEmoticon().toString().replaceAll("\\[", "").replaceAll("\\]", "");
 	}
 
 	@POST

@@ -2,6 +2,8 @@ package org.belaran.tasks;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Singleton;
 
@@ -29,6 +31,12 @@ public class TagController {
 
     public Map<String, String> getTagsIndexedByName() {
         return tagsIndexedByName;
+    }
+
+    public List<String> returnAllTagsIndexedByEmoticon() {
+        return tagsIndexedByName.entrySet().stream()
+                    .map(entry -> entry.getValue() + "\t-> " + entry.getKey())
+                    .collect(Collectors.toList());
     }
 
     public static String tagTaskTitle(String symbol, String title) {
