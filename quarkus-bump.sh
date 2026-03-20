@@ -18,3 +18,4 @@ sed -i pom.xml -e "s/\(<gtasks.version>\)[0-9\.]*/\1${GTASKS_VERSION}/" \
 
 git commit -m "Bump Quarkus to ${QUARKUS_VERSION} and gtasks to ${GTASKS_VERSION}" pom.xml
 git tag "${GTASKS_VERSION}"
+git show
