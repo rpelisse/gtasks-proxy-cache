@@ -10,6 +10,7 @@
     <properties>
         <gtasks.version>3.8.4</gtasks.version>
         <quarkus.version>3.35.3</quarkus.version>
+        <pmd.version>7.25.0-SNAPSHOT</pmd.version>
         <google.tasks.version>v1-rev71-1.25.0</google.tasks.version>
         <google.api.version>1.25.0</google.api.version>
         <surefire.version>3.5.4</surefire.version>
@@ -111,8 +112,48 @@
             </execution>
           </executions>
         </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-pmd-plugin</artifactId>
+            <version>3.25.0</version>
+            <dependencies>
+                <dependency>
+                    <groupId>net.sourceforge.pmd</groupId>
+                    <artifactId>pmd-core</artifactId>
+                    <version>${pmd.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>net.sourceforge.pmd</groupId>
+                    <artifactId>pmd-java</artifactId>
+                    <version>${pmd.version}</version>
+                </dependency>
+            </dependencies>
+            <configuration>
+                <linkXRef>false</linkXRef>
+                <sourceEncoding>utf-8</sourceEncoding>
+                <minimumTokens>100</minimumTokens>
+                <targetJdk>22</targetJdk>
+            </configuration>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>check</goal>
+                        <goal>cpd-check</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
       </plugins>
     </build>
+	<reporting>
+      <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-pmd-plugin</artifactId>
+            <version>3.25.0</version>
+        </plugin>
+      </plugins>
+	</reporting>
     <profiles>
         <profile>
             <id>native</id>
