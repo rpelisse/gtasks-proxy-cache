@@ -1,6 +1,5 @@
 #!/bin/bash
 set -euo pipefail
-source ./settings.sh
 
 check_cmd() {
   local cmd=${1}
@@ -23,4 +22,4 @@ check_cmd 'mvn' "${MAVEN_HOME}"
 
 export TASKSD_PIDFILE=$(pwd)/taskd.pid
 export TASKS_CLIENT_SECRET="$(pwd)/client_secret.json"
-mvn clean -Dquarkus.package.type=uber-jar package
+./mvnw clean -Dquarkus.package.type=uber-jar package
