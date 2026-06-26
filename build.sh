@@ -21,4 +21,4 @@ check_cmd 'java' "${JAVA_HOME}"
 
 export TASKSD_PIDFILE=$(pwd)/taskd.pid
 export TASKS_CLIENT_SECRET="$(pwd)/client_secret.json"
-./mvnw clean -Dquarkus.package.type=uber-jar package
+./mvnw clean -o -Dquarkus.package.type=uber-jar package
