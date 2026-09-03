@@ -13,6 +13,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.Comparator;
+import java.util.List;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -156,7 +158,6 @@ public class TasksServiceEndpoint {
 		return refreshAndReturnInfoMessage(gtasksClient.tagAndUpdateTask(tagController.getSymbolForTag(tag), gtasksClient.retrieveTaskById(id)));
 	}
 
-
 	@DELETE
 	@Path("/tag/{id}/{tag}")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -195,11 +196,25 @@ public class TasksServiceEndpoint {
 	@Path("/list/today")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String todayList() throws IOException, GeneralSecurityException {
-		final var today = today();
-		return FormatUtils.formatTaskList(tasks.getTasks().values(), (t -> {
-			return DateUtils.isSameDay(today, t.getDue());
-		}), today);
-	}
+        var today = today();
+        return FormatUtils.formatTaskList(sortTasksOfDay(today), (t -> true), today);
+    }
+
+    final List<String> priorityEmojis = List.of("✉️", "💊", "⛔");
+    final Comparator<Task> emojiPriorityComparator = Comparator.comparingInt(t -> {
+        String title = t.getTitle();
+        for (int i = 0; i < priorityEmojis.size(); i++)
+            if (title.startsWith(priorityEmojis.get(i)))
+                   return i;
+        return priorityEmojis.size();
+    });
+
+    private List<Task> sortTasksOfDay(DateTime date) {
+        return tasks.getTasks().values().stream()
+        .filter(t -> DateUtils.isSameDay(date, t.getDue()))
+        .sorted(emojiPriorityComparator)  //Comparator.comparing(Task::getTitle))
+        .toList();
+    }
 
 	@GET
 	@Path("/list/overdue")
@@ -214,10 +229,8 @@ public class TasksServiceEndpoint {
 	@Path("/list/tomorrow")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String list() throws IOException, GeneralSecurityException {
-		final var tomorrow = tomorrow();
-		return FormatUtils.formatTaskList(tasks.getTasks().values(),(t -> {
-			return DateUtils.isSameDay(tomorrow, t.getDue());
-		}), tomorrow);
+	    final var tomorrow = tomorrow();
+        return FormatUtils.formatTaskList(sortTasksOfDay(tomorrow), (t -> true), tomorrow);
 	}
 
 	@GET
@@ -225,10 +238,7 @@ public class TasksServiceEndpoint {
 	@Produces(MediaType.TEXT_PLAIN)
 	public String listOnDay(@NotBlank @PathParam(value = "date") String date) throws IOException, GeneralSecurityException {
 		final var dueDate = DateTime.parseRfc3339(date + "T00:00:00.00Z");
-                LOGGER.info("List tasks on:" + dueDate);
-		return FormatUtils.formatTaskList(tasks.getTasks().values(),(t -> {
-			return DateUtils.isSameDay(dueDate, t.getDue());
-		}), dueDate);
+        return FormatUtils.formatTaskList(sortTasksOfDay(dueDate), (t -> true), dueDate);
 	}
 
 	@GET
