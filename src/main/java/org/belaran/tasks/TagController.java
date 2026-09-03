@@ -6,28 +6,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Singleton;
+import jakarta.annotation.PostConstruct;
+import jakarta.inject.Inject;
 
 @Singleton
 public class TagController {
 
-    private Map<String,String> tagsIndexedByName = new HashMap<String, String>(3);
+    private Map<String,String> tagsIndexedByName;
 
-    public TagController() {
-        tagsIndexedByName.put("phone", "📞");
-        tagsIndexedByName.put("dollar", "💲");
-        tagsIndexedByName.put("blocker", "⛔");
-        tagsIndexedByName.put("rpg","🎲");
-        tagsIndexedByName.put("email", "✉️");
-        tagsIndexedByName.put("cat", "🐈");
-        tagsIndexedByName.put("music", "🎶");
-        tagsIndexedByName.put("house", "🏠");
-        tagsIndexedByName.put("print", "📄");
-        tagsIndexedByName.put("food", "🍆");
-        tagsIndexedByName.put("medics","💊");
-        tagsIndexedByName.put("write","✏️");
-        tagsIndexedByName.put("drums","🥁");
-        tagsIndexedByName.put("clock","⌚");
-        tagsIndexedByName.put("to-read","📖");
+    @Inject
+    TasksConfig config;
+
+    public TagController() {}
+
+    @PostConstruct
+    public void loadTags() {
+        tagsIndexedByName = config.tags();
     }
 
     public Map<String, String> getTagsIndexedByName() {
