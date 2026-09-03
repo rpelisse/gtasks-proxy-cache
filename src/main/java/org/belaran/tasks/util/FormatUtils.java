@@ -12,9 +12,7 @@ public final class FormatUtils {
 
 	private static final String EOL = "\n";
 
-	private FormatUtils() {
-
-	}
+	private FormatUtils() {}
 
 	public static String formatTaskWithNotes(Task t) {
 		return "[" + t.getId() + "] " + t.getTitle() + EOL + t.getNotes() + EOL;
@@ -35,7 +33,7 @@ public final class FormatUtils {
 	}
 
 	private static String formatTaskWithNumber(AtomicInteger counter, Task t, TaskFormatter taskFormatterFunction) {
-		return counter.getAndIncrement() + ") " + taskFormatterFunction.formatTasks(t);
+		return String.format("%02d", counter.getAndIncrement()) + ") " + taskFormatterFunction.formatTasks(t);
 	}
 
 	private static String selectTasksToDisplay(Collection<Task> tasks, Predicate<Task> predicate,
