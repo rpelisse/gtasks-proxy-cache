@@ -3,6 +3,7 @@ package org.belaran.tasks.util;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 
 import org.jsoup.Jsoup;
 
@@ -37,6 +38,12 @@ public final class TaskUtils {
 
     public static Task removeTagFromTaskTitle(Task task, String tag) {
         task.setTitle(task.getTitle().replaceAll(tag + " *", ""));
+        return task;
+    }
+
+    public static Task removeTagsFromTaskTitle(Task task, List<String> tags) {
+        for (String tag : tags)
+            task = removeTagFromTaskTitle(task, tag);
         return task;
     }
 

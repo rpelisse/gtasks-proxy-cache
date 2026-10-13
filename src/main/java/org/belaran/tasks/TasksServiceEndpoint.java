@@ -166,6 +166,13 @@ public class TasksServiceEndpoint {
 		return refreshAndReturnInfoMessage(gtasksClient.removeTagAndUpdateTask(tagController.getSymbolForTag(tag), gtasksClient.retrieveTaskById(id)));
 	}
 
+    @DELETE
+    @Path("/tag/{id}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String removeAllTagsFromTask(@NotBlank @PathParam(value = "id") String id) throws IOException, GeneralSecurityException {
+        return refreshAndReturnInfoMessage(gtasksClient.removeAllTagsAndUpdateTask(gtasksClient.retrieveTaskById(id), tagController.returnAllTagsEmoticons()));
+    }
+
 	private String refreshAndReturnInfoMessage(Task task) throws IOException, GeneralSecurityException {
             asyncRefresh();
 	    return "Tagged task '" + task.getId() + "' - '" + task.getTitle() + "'.";

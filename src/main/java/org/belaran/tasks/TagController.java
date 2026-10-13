@@ -34,6 +34,12 @@ public class TagController {
                     .collect(Collectors.toList());
     }
 
+    public List<String> returnAllTagsEmoticons() {
+        return tagsIndexedByName.entrySet().stream()
+                    .map(entry -> entry.getValue())
+                    .collect(Collectors.toList());
+    }
+
     public static String tagTaskTitle(String symbol, String title) {
         return symbol + " " + title;
     }
