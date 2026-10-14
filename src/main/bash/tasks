@@ -120,8 +120,7 @@ while getopts VhlLrtda:i:n:ip:bos:S:D:T:u:U:R: OPT; do
         task_to_perform='untag'
         tag_id="${OPTARG}"
         if [ -z "${tag_id}" ]; then
-          echo "Missing tag id! Aborting."
-          exit 5
+          echo "No tag id given, removing all tags."
         fi
         ;;
     R)
