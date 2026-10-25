@@ -64,7 +64,7 @@ public final class FormatUtils {
 	}
 
 	interface TaskFormatter {
-		public String formatTasks(Task t);
+		String formatTasks(Task t);
 	}
 
 	class DefaultTaskFormatter implements TaskFormatter {

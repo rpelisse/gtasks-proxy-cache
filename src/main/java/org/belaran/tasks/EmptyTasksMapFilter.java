@@ -37,7 +37,7 @@ public class EmptyTasksMapFilter implements ContainerRequestFilter {
 			if ( tasks.getTasks().isEmpty() ) {
 				client.resetClient();
 				client.getService();
-				synchronized (tasks) {
+				synchronized (tasks) { // NOPMD AvoidSynchronizedStatement
 					tasks.getTasks().putAll(client.fetchAllItemsOfDefaultList());
 				}
 			}
@@ -58,7 +58,7 @@ public class EmptyTasksMapFilter implements ContainerRequestFilter {
 		try {
 			counter.await(nbMilliSeconds, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException e) {
-			// ignore, filter will simply hand over the request
+            LOGGER.debug("ignore, filter will simply hand over the request",e);
 		}
 	}
 }

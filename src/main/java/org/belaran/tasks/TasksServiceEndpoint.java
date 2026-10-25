@@ -27,7 +27,6 @@ import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Min;
 
 import org.belaran.tasks.util.DateUtils;
 import org.belaran.tasks.util.FormatUtils;
@@ -326,6 +325,6 @@ public class TasksServiceEndpoint {
 	@Path("/version")
 	@Produces(MediaType.TEXT_PLAIN)
 	public String version() {
-		return "GTasks Proxy Cache Version: " + org.belaran.tasks.GtasksVersion.VERSION + " (Powered by Quarkus v" + org.belaran.tasks.GtasksVersion.QUARKUS_VERSION + " and using GTasks client API: " + org.belaran.tasks.GtasksVersion.GTASKS_VERSION + ")";
+		return "GTasks Proxy Cache Version: " + GtasksVersion.VERSION + " (Powered by Quarkus v" + GtasksVersion.QUARKUS_VERSION + " and using GTasks client API: " + GtasksVersion.GTASKS_VERSION + ")";
 	}
 }
