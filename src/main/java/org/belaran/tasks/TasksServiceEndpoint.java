@@ -207,7 +207,7 @@ public class TasksServiceEndpoint {
         return FormatUtils.formatTaskList(sortTasksOfDay(today), (t -> true), today);
     }
 
-    final List<String> priorityEmojis = List.of("✉️", "💊", "⛔");
+    final List<String> priorityEmojis = List.of("📞","✉️", "💊", "⛔");
     final Comparator<Task> emojiPriorityComparator = Comparator.comparingInt(t -> {
         String title = t.getTitle();
         for (int i = 0; i < priorityEmojis.size(); i++)
