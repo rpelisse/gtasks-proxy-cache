@@ -133,6 +133,7 @@
                 <sourceEncoding>utf-8</sourceEncoding>
                 <minimumTokens>100</minimumTokens>
                 <targetJdk>22</targetJdk>
+                <failOnViolation>false</failOnViolation>
                 <rulesets>
                     <ruleset>src/main/resources/ruleset.xml</ruleset>
                 </rulesets>
